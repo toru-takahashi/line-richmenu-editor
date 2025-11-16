@@ -1,0 +1,11 @@
+name = "richmenu-api-worker"
+main = "index.ts"
+compatibility_date = "2024-01-01"
+
+# Uncomment and configure if you need to specify a route
+# routes = [
+#   { pattern = "api.example.com/*", zone_name = "example.com" }
+# ]
+
+# Workers.dev subdomain
+# workers_dev = true

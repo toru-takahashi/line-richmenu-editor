@@ -1,0 +1,76 @@
+:root{
+  --bg: #f7f8fa;
+  --panel: #ffffff;
+  /* Treasure Data blue (approximation) */
+  --accent: #0066cc;
+  --accent-strong: #004b99;
+  --ai-gradient: linear-gradient(90deg, rgba(0,102,204,1) 0%, rgba(0,75,153,1) 100%);
+}
+*{box-sizing:border-box}
+html,body,#root{height:100%;}
+body{margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue';background:var(--bg);}
+.app{display:flex;gap:12px;padding:12px;height:100vh}
+.topbar{position:fixed;left:12px;right:12px;top:12px;height:56px;border-radius:10px;color:#fff;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--ai-gradient);box-shadow:0 6px 18px rgba(0,75,153,0.12);z-index:40}
+.brandTitle{font-weight:700}
+.layout{display:flex;gap:12px;padding-top:80px;height:calc(100vh - 80px)}
+.left{width:300px;background:var(--panel);padding:14px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.center{flex:1 1 720px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:12px}
+.right{width:480px;min-width:360px;background:var(--panel);padding:16px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:auto}
+.field{margin-bottom:8px}
+.field label{display:block;font-size:13px;margin-bottom:4px;color:#333}
+.field input[type='text'],.field input[type='number'],.field textarea,.field select{width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:6px}
+.canvasWrap{background:#fff;padding:8px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.08)}
+.canvas{position:relative;touch-action:none;user-select:none}
+.canvas img{display:block;max-width:100%;height:auto}
+/* removed .overlay rule to avoid confusion with runtime DOM - overlay elements are rendered directly in components */
+.phoneFrame{width:460px;padding:14px;border-radius:26px;background:linear-gradient(180deg,#0b1220,#08101a);box-shadow:0 10px 30px rgba(3,10,30,0.4);display:flex;align-items:center;justify-content:center}
+.phoneScreen{width:100%;background:#fff;border-radius:16px;overflow:hidden;display:block}
+.phoneStatus{height:28px;background:linear-gradient(90deg,#eef2ff,#fff);opacity:0.06}
+.areaRect{position:absolute;border:2px dashed rgba(37,99,235,0.9);background:rgba(37,99,235,0.12);box-shadow:0 2px 6px rgba(37,99,235,0.06);}
+.areaRect.selected{border-style:solid;background:rgba(37,99,235,0.16)}
+.areasList{margin-top:8px}
+.areasList .item{padding:10px;border:1px solid #eee;border-radius:8px;margin-bottom:10px;background:#fff;display:flex;flex-direction:column;gap:8px}
+.areasList .item .row{display:flex;justify-content:space-between;align-items:center;width:100%}
+.small{font-size:12px;color:#666}
+.btn{display:inline-block;padding:8px 12px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer}
+.btn.secondary{background:#6b7280}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(0,0,0,0.06)}
+.areaRect{position:absolute;border:2px dashed rgba(0,75,153,0.95);background:rgba(0,102,204,0.10);box-shadow:0 2px 6px rgba(0,75,153,0.06);} 
+.areaRect.selected{border-style:solid;background:rgba(0,102,204,0.14)}
+.areaRect .handle{position:absolute;width:12px;height:12px;border-radius:3px;background:#fff;border:2px solid var(--accent-strong);box-shadow:0 1px 3px rgba(0,0,0,0.12)}
+.areaRect .handle.nw{left:-7px;top:-7px;cursor:nwse-resize}
+.areaRect .handle.ne{right:-7px;top:-7px;cursor:nesw-resize}
+.areaRect .handle.sw{left:-7px;bottom:-7px;cursor:nesw-resize}
+.areaRect .handle.se{right:-7px;bottom:-7px;cursor:nwse-resize}
+.areaRect .handle.n{left:50%;top:-7px;transform:translateX(-50%);cursor:ns-resize}
+.areaRect .handle.s{left:50%;bottom:-7px;transform:translateX(-50%);cursor:ns-resize}
+.areaRect .handle.w{left:-7px;top:50%;transform:translateY(-50%);cursor:ew-resize}
+.areaRect .handle.e{right:-7px;top:50%;transform:translateY(-50%);cursor:ew-resize}
+.canvas{background:#f8fafc}
+.hint{font-size:12px;color:#a00000}
+
+/* submenu/edit form inside list item */
+.areasList .submenu{background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,250,0.9));padding:10px;border-radius:6px;border:1px solid rgba(0,0,0,0.04)}
+.areasList .field{margin-bottom:10px}
+.areasList .field input[type='date'], .areasList .field input[type='time'], .areasList .field input[type='datetime-local']{width:auto}
+
+/* Responsive: collapse right panel into stacked layout on small screens */
+@media (max-width: 900px) {
+  .layout { flex-direction: column; gap: 12px; padding-top: 96px }
+  .left, .center, .right { width: 100%; min-width: 0 }
+  .left { order: 1 }
+  .center { order: 2; align-items: stretch; padding: 10px }
+  .right { order: 3; max-height: 50vh; overflow: auto; padding: 12px }
+  .canvasWrap { width: 100%; box-sizing: border-box }
+  .areasList .item { flex-direction: column }
+  /* make form controls expand comfortably in stacked layout */
+  .field input[type='text'], .field input[type='number'], .field textarea, .field select { width: 100% }
+}
+
+/* rich menu preview styles */
+.richPreview{display:flex;justify-content:center}
+.previewPhone{width:400px;border-radius:12px;overflow:hidden;background:#fff;border:1px solid #e6eefc}
+.previewScreen{display:flex;flex-direction:column}
+.chatArea{height:200px;display:flex;align-items:center;justify-content:center}
+.richmenuBar{padding:10px;background:#f8fafc;border-top:1px solid #edf2ff;display:flex;flex-direction:column;align-items:center}
+.chatBar{font-size:13px;color:#0f172a}

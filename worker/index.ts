@@ -9,19 +9,34 @@ interface Env {
 
 const LINE_API_BASE = 'https://api.line.me/v2/bot';
 
-// CORS headers for GitHub Pages
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+// Allowed origins for CORS (production only)
+const ALLOWED_ORIGINS = [
+  'https://toru-takahashi.github.io',
+  'http://localhost:5173', // For local development
+];
+
+/**
+ * Get CORS headers based on request origin
+ */
+function getCorsHeaders(request: Request): Record<string, string> {
+  const origin = request.headers.get('Origin');
+  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+}
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const corsHeaders = getCorsHeaders(request);
+
     // Handle CORS preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, {
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
       });
     }
 
@@ -39,45 +54,46 @@ export default {
     try {
       // Route requests
       if (path === '/api/richmenu' && request.method === 'POST') {
-        return await createRichMenu(request, channelAccessToken);
+        return await createRichMenu(request, channelAccessToken, corsHeaders);
       } else if (path.match(/^\/api\/richmenu\/[^\/]+\/content$/) && request.method === 'POST') {
         const richMenuId = path.split('/')[3];
-        return await uploadRichMenuImage(request, channelAccessToken, richMenuId);
+        return await uploadRichMenuImage(request, channelAccessToken, richMenuId, corsHeaders);
       } else if (path.match(/^\/api\/richmenu\/[^\/]+\/content$/) && request.method === 'GET') {
         const richMenuId = path.split('/')[3];
-        return await downloadRichMenuImage(channelAccessToken, richMenuId);
+        return await downloadRichMenuImage(channelAccessToken, richMenuId, corsHeaders);
       } else if (path === '/api/richmenu/list' && request.method === 'GET') {
-        return await listRichMenus(channelAccessToken);
+        return await listRichMenus(channelAccessToken, corsHeaders);
       } else if (path.match(/^\/api\/richmenu\/[^\/]+$/) && request.method === 'GET') {
         const richMenuId = path.split('/')[3];
-        return await getRichMenu(channelAccessToken, richMenuId);
+        return await getRichMenu(channelAccessToken, richMenuId, corsHeaders);
       } else if (path.match(/^\/api\/richmenu\/[^\/]+$/) && request.method === 'DELETE') {
         const richMenuId = path.split('/')[3];
-        return await deleteRichMenu(channelAccessToken, richMenuId);
+        return await deleteRichMenu(channelAccessToken, richMenuId, corsHeaders);
       } else if (path.match(/^\/api\/richmenu\/[^\/]+\/default$/) && request.method === 'POST') {
         const richMenuId = path.split('/')[3];
-        return await setDefaultRichMenu(channelAccessToken, richMenuId);
+        return await setDefaultRichMenu(channelAccessToken, richMenuId, corsHeaders);
       } else if (path === '/api/richmenu/default' && request.method === 'DELETE') {
-        return await cancelDefaultRichMenu(channelAccessToken);
+        return await cancelDefaultRichMenu(channelAccessToken, corsHeaders);
       } else if (path.match(/^\/api\/user\/[^\/]+\/richmenu\/[^\/]+$/) && request.method === 'POST') {
         const parts = path.split('/');
         const userId = parts[3];
         const richMenuId = parts[5];
-        return await linkRichMenuToUser(channelAccessToken, userId, richMenuId);
+        return await linkRichMenuToUser(channelAccessToken, userId, richMenuId, corsHeaders);
       } else if (path.match(/^\/api\/user\/[^\/]+\/richmenu$/) && request.method === 'DELETE') {
         const userId = path.split('/')[3];
-        return await unlinkRichMenuFromUser(channelAccessToken, userId);
+        return await unlinkRichMenuFromUser(channelAccessToken, userId, corsHeaders);
       } else if (path.match(/^\/api\/user\/[^\/]+\/richmenu$/) && request.method === 'GET') {
         const userId = path.split('/')[3];
-        return await getUserRichMenu(channelAccessToken, userId);
+        return await getUserRichMenu(channelAccessToken, userId, corsHeaders);
       } else {
-        return jsonResponse({ error: 'Not found' }, 404);
+        return jsonResponse({ error: 'Not found' }, 404, corsHeaders);
       }
     } catch (error) {
       console.error('Error:', error);
       return jsonResponse(
         { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
-        500
+        500,
+        corsHeaders
       );
     }
   },
@@ -86,7 +102,7 @@ export default {
 /**
  * Create a new rich menu
  */
-async function createRichMenu(request: Request, token: string): Promise<Response> {
+async function createRichMenu(request: Request, token: string, corsHeaders: Record<string, string>): Promise<Response> {
   const body = await request.json();
 
   const response = await fetch(`${LINE_API_BASE}/richmenu`, {
@@ -100,7 +116,7 @@ async function createRichMenu(request: Request, token: string): Promise<Response
 
   const data = await response.json();
 
-  return jsonResponse(data, response.status);
+  return jsonResponse(data, response.status, corsHeaders);
 }
 
 /**
@@ -109,7 +125,8 @@ async function createRichMenu(request: Request, token: string): Promise<Response
 async function uploadRichMenuImage(
   request: Request,
   token: string,
-  richMenuId: string
+  richMenuId: string,
+  corsHeaders: Record<string, string>
 ): Promise<Response> {
   // Get the image data from the request
   const contentType = request.headers.get('Content-Type') || 'image/png';
@@ -126,10 +143,10 @@ async function uploadRichMenuImage(
   });
 
   if (response.ok) {
-    return jsonResponse({ message: 'Image uploaded successfully' }, 200);
+    return jsonResponse({ message: 'Image uploaded successfully' }, 200, corsHeaders);
   } else {
     const error = await response.text();
-    return jsonResponse({ error: 'Failed to upload image', details: error }, response.status);
+    return jsonResponse({ error: 'Failed to upload image', details: error }, response.status, corsHeaders);
   }
 }
 
@@ -138,7 +155,8 @@ async function uploadRichMenuImage(
  */
 async function downloadRichMenuImage(
   token: string,
-  richMenuId: string
+  richMenuId: string,
+  corsHeaders: Record<string, string>
 ): Promise<Response> {
   const response = await fetch(`${LINE_API_BASE}/richmenu/${richMenuId}/content`, {
     method: 'GET',
@@ -156,19 +174,19 @@ async function downloadRichMenuImage(
       status: 200,
       headers: {
         'Content-Type': contentType,
-        ...CORS_HEADERS,
+        ...corsHeaders,
       },
     });
   } else {
     const error = await response.text();
-    return jsonResponse({ error: 'Failed to download image', details: error }, response.status);
+    return jsonResponse({ error: 'Failed to download image', details: error }, response.status, corsHeaders);
   }
 }
 
 /**
  * Get list of all rich menus
  */
-async function listRichMenus(token: string): Promise<Response> {
+async function listRichMenus(token: string, corsHeaders: Record<string, string>): Promise<Response> {
   const response = await fetch(`${LINE_API_BASE}/richmenu/list`, {
     method: 'GET',
     headers: {
@@ -177,13 +195,13 @@ async function listRichMenus(token: string): Promise<Response> {
   });
 
   const data = await response.json();
-  return jsonResponse(data, response.status);
+  return jsonResponse(data, response.status, corsHeaders);
 }
 
 /**
  * Get a specific rich menu
  */
-async function getRichMenu(token: string, richMenuId: string): Promise<Response> {
+async function getRichMenu(token: string, richMenuId: string, corsHeaders: Record<string, string>): Promise<Response> {
   const response = await fetch(`${LINE_API_BASE}/richmenu/${richMenuId}`, {
     method: 'GET',
     headers: {
@@ -192,13 +210,13 @@ async function getRichMenu(token: string, richMenuId: string): Promise<Response>
   });
 
   const data = await response.json();
-  return jsonResponse(data, response.status);
+  return jsonResponse(data, response.status, corsHeaders);
 }
 
 /**
  * Delete a rich menu
  */
-async function deleteRichMenu(token: string, richMenuId: string): Promise<Response> {
+async function deleteRichMenu(token: string, richMenuId: string, corsHeaders: Record<string, string>): Promise<Response> {
   const response = await fetch(`${LINE_API_BASE}/richmenu/${richMenuId}`, {
     method: 'DELETE',
     headers: {
@@ -207,17 +225,17 @@ async function deleteRichMenu(token: string, richMenuId: string): Promise<Respon
   });
 
   if (response.ok) {
-    return jsonResponse({ message: 'Rich menu deleted successfully' }, 200);
+    return jsonResponse({ message: 'Rich menu deleted successfully' }, 200, corsHeaders);
   } else {
     const error = await response.text();
-    return jsonResponse({ error: 'Failed to delete rich menu', details: error }, response.status);
+    return jsonResponse({ error: 'Failed to delete rich menu', details: error }, response.status, corsHeaders);
   }
 }
 
 /**
  * Set default rich menu
  */
-async function setDefaultRichMenu(token: string, richMenuId: string): Promise<Response> {
+async function setDefaultRichMenu(token: string, richMenuId: string, corsHeaders: Record<string, string>): Promise<Response> {
   const response = await fetch(`${LINE_API_BASE}/user/all/richmenu/${richMenuId}`, {
     method: 'POST',
     headers: {
@@ -226,17 +244,17 @@ async function setDefaultRichMenu(token: string, richMenuId: string): Promise<Re
   });
 
   if (response.ok) {
-    return jsonResponse({ message: 'Default rich menu set successfully' }, 200);
+    return jsonResponse({ message: 'Default rich menu set successfully' }, 200, corsHeaders);
   } else {
     const error = await response.text();
-    return jsonResponse({ error: 'Failed to set default rich menu', details: error }, response.status);
+    return jsonResponse({ error: 'Failed to set default rich menu', details: error }, response.status, corsHeaders);
   }
 }
 
 /**
  * Cancel default rich menu
  */
-async function cancelDefaultRichMenu(token: string): Promise<Response> {
+async function cancelDefaultRichMenu(token: string, corsHeaders: Record<string, string>): Promise<Response> {
   const response = await fetch(`${LINE_API_BASE}/user/all/richmenu`, {
     method: 'DELETE',
     headers: {
@@ -245,17 +263,17 @@ async function cancelDefaultRichMenu(token: string): Promise<Response> {
   });
 
   if (response.ok) {
-    return jsonResponse({ message: 'Default rich menu cancelled successfully' }, 200);
+    return jsonResponse({ message: 'Default rich menu cancelled successfully' }, 200, corsHeaders);
   } else {
     const error = await response.text();
-    return jsonResponse({ error: 'Failed to cancel default rich menu', details: error }, response.status);
+    return jsonResponse({ error: 'Failed to cancel default rich menu', details: error }, response.status, corsHeaders);
   }
 }
 
 /**
  * Link rich menu to a specific user
  */
-async function linkRichMenuToUser(token: string, userId: string, richMenuId: string): Promise<Response> {
+async function linkRichMenuToUser(token: string, userId: string, richMenuId: string, corsHeaders: Record<string, string>): Promise<Response> {
   const response = await fetch(`${LINE_API_BASE}/user/${userId}/richmenu/${richMenuId}`, {
     method: 'POST',
     headers: {
@@ -264,17 +282,17 @@ async function linkRichMenuToUser(token: string, userId: string, richMenuId: str
   });
 
   if (response.ok) {
-    return jsonResponse({ message: 'Rich menu linked to user successfully' }, 200);
+    return jsonResponse({ message: 'Rich menu linked to user successfully' }, 200, corsHeaders);
   } else {
     const error = await response.text();
-    return jsonResponse({ error: 'Failed to link rich menu to user', details: error }, response.status);
+    return jsonResponse({ error: 'Failed to link rich menu to user', details: error }, response.status, corsHeaders);
   }
 }
 
 /**
  * Unlink rich menu from a specific user
  */
-async function unlinkRichMenuFromUser(token: string, userId: string): Promise<Response> {
+async function unlinkRichMenuFromUser(token: string, userId: string, corsHeaders: Record<string, string>): Promise<Response> {
   const response = await fetch(`${LINE_API_BASE}/user/${userId}/richmenu`, {
     method: 'DELETE',
     headers: {
@@ -283,17 +301,17 @@ async function unlinkRichMenuFromUser(token: string, userId: string): Promise<Re
   });
 
   if (response.ok) {
-    return jsonResponse({ message: 'Rich menu unlinked from user successfully' }, 200);
+    return jsonResponse({ message: 'Rich menu unlinked from user successfully' }, 200, corsHeaders);
   } else {
     const error = await response.text();
-    return jsonResponse({ error: 'Failed to unlink rich menu from user', details: error }, response.status);
+    return jsonResponse({ error: 'Failed to unlink rich menu from user', details: error }, response.status, corsHeaders);
   }
 }
 
 /**
  * Get rich menu linked to a specific user
  */
-async function getUserRichMenu(token: string, userId: string): Promise<Response> {
+async function getUserRichMenu(token: string, userId: string, corsHeaders: Record<string, string>): Promise<Response> {
   const response = await fetch(`${LINE_API_BASE}/user/${userId}/richmenu`, {
     method: 'GET',
     headers: {
@@ -303,22 +321,22 @@ async function getUserRichMenu(token: string, userId: string): Promise<Response>
 
   if (response.ok) {
     const data = await response.json();
-    return jsonResponse(data, 200);
+    return jsonResponse(data, 200, corsHeaders);
   } else {
     const error = await response.text();
-    return jsonResponse({ error: 'Failed to get user rich menu', details: error }, response.status);
+    return jsonResponse({ error: 'Failed to get user rich menu', details: error }, response.status, corsHeaders);
   }
 }
 
 /**
  * Helper function to create JSON responses with CORS headers
  */
-function jsonResponse(data: any, status: number = 200): Response {
+function jsonResponse(data: any, status: number = 200, corsHeaders: Record<string, string>): Response {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       'Content-Type': 'application/json',
-      ...CORS_HEADERS,
+      ...corsHeaders,
     },
   });
 }

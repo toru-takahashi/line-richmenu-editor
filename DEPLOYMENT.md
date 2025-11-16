@@ -169,34 +169,25 @@ GitHubにpushすると自動的にビルド・デプロイされます。
 
 ## 4. CORS設定の強化（本番環境）
 
-セキュリティ向上のため、Worker側でCORSの許可オリジンを制限してください。
+**✓ 既に設定済み**
 
-`worker/index.ts`を編集：
+セキュリティ向上のため、Worker側でCORSの許可オリジンを以下のドメインのみに制限しています：
 
-```typescript
-// 本番環境のオリジンのみ許可
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': 'https://yourusername.github.io', // あなたのドメイン
-  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-```
+- `https://toru-takahashi.github.io` （本番環境）
+- `http://localhost:5173` （ローカル開発環境）
 
-複数のドメインを許可する場合：
+これにより、他のドメインからのアクセスはブロックされます。
+
+### カスタムドメインを追加する場合
+
+`worker/index.ts`の`ALLOWED_ORIGINS`配列に追加してください：
 
 ```typescript
-const allowedOrigins = [
-  'https://yourusername.github.io',
-  'https://yourdomain.com',
+const ALLOWED_ORIGINS = [
+  'https://toru-takahashi.github.io',
+  'http://localhost:5173',
+  'https://yourdomain.com', // 追加するカスタムドメイン
 ];
-
-// fetch関数内で
-const origin = request.headers.get('Origin');
-const corsHeaders = {
-  'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : allowedOrigins[0],
-  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
 ```
 
 変更後、Workerを再デプロイ：

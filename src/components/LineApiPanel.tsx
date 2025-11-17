@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { RichMenu } from '../types'
 import { LineApiClient } from '../api/lineApi'
+import { useI18n } from '../i18n/useI18n'
 
 type Props = {
   menu: RichMenu
@@ -9,6 +10,7 @@ type Props = {
 }
 
 export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) {
+  const { t } = useI18n()
   // Get configured Worker URL from environment variable
   const configuredWorkerUrl = import.meta.env.VITE_WORKER_URL || ''
 
@@ -47,7 +49,7 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
 
   const getApiClient = (): LineApiClient | null => {
     if (!workerUrl || !channelAccessToken) {
-      setResult('エラー: Worker URLとチャンネルアクセストークンを入力してください')
+      setResult(t('errorWorkerUrlRequired'))
       return null
     }
     return new LineApiClient({ workerUrl, channelAccessToken })
@@ -72,19 +74,19 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
 
       const response = await client.createRichMenu(richMenuData)
       setCreatedRichMenuId(response.richMenuId)
-      setResult(`✓ リッチメニュー作成成功!\nRich Menu ID: ${response.richMenuId}`)
+      setResult(t('richMenuCreated', { richMenuId: response.richMenuId }))
 
       // If image exists, upload it
       if (imageUrl) {
-        setResult(prev => prev + '\n\n画像をアップロード中...')
+        setResult(prev => prev + t('uploadingImage'))
         const imageBlob = await client.imageUrlToBlob(imageUrl)
         await client.uploadRichMenuImage(response.richMenuId, imageBlob)
-        setResult(prev => prev + '\n✓ 画像アップロード成功!')
+        setResult(prev => prev + t('imageUploaded'))
       }
 
-      setResult(prev => prev + '\n\n完了!')
+      setResult(prev => prev + t('completed'))
     } catch (error) {
-      setResult(`エラー: ${error instanceof Error ? error.message : '不明なエラー'}`)
+      setResult(t('error', { message: error instanceof Error ? error.message : 'Unknown error' }))
     } finally {
       setLoading(false)
     }
@@ -101,9 +103,9 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
       const response = await client.listRichMenus()
       setRichMenus(response.richmenus || [])
       setShowRichMenus(true)
-      setResult(`✓ ${response.richmenus?.length || 0}件のリッチメニューを取得しました`)
+      setResult(t('richMenusCount', { count: (response.richmenus?.length || 0).toString() }))
     } catch (error) {
-      setResult(`エラー: ${error instanceof Error ? error.message : '不明なエラー'}`)
+      setResult(t('error', { message: error instanceof Error ? error.message : 'Unknown error' }))
     } finally {
       setLoading(false)
     }
@@ -113,7 +115,7 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
     const client = getApiClient()
     if (!client) return
 
-    if (!confirm(`リッチメニュー ${richMenuId} を削除しますか？`)) {
+    if (!confirm(t('deleteConfirm', { richMenuId }))) {
       return
     }
 
@@ -122,11 +124,11 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
 
     try {
       await client.deleteRichMenu(richMenuId)
-      setResult(`✓ リッチメニュー ${richMenuId} を削除しました`)
+      setResult(t('richMenuDeleted', { richMenuId }))
       // Refresh list
       await handleListRichMenus()
     } catch (error) {
-      setResult(`エラー: ${error instanceof Error ? error.message : '不明なエラー'}`)
+      setResult(t('error', { message: error instanceof Error ? error.message : 'Unknown error' }))
     } finally {
       setLoading(false)
     }
@@ -141,9 +143,9 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
 
     try {
       await client.setDefaultRichMenu(richMenuId)
-      setResult(`✓ リッチメニュー ${richMenuId} をデフォルトに設定しました`)
+      setResult(t('richMenuSetDefault', { richMenuId }))
     } catch (error) {
-      setResult(`エラー: ${error instanceof Error ? error.message : '不明なエラー'}`)
+      setResult(t('error', { message: error instanceof Error ? error.message : 'Unknown error' }))
     } finally {
       setLoading(false)
     }
@@ -182,12 +184,12 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
 
       // Load into editor
       onLoadRichMenu(loadedMenu, imageDataUrl)
-      setResult(`✓ リッチメニュー ${richMenuId} を読み込みました`)
+      setResult(t('richMenuLoaded', { richMenuId }))
 
       // Close the modal after loading
       setShowRichMenus(false)
     } catch (error) {
-      setResult(`エラー: ${error instanceof Error ? error.message : '不明なエラー'}`)
+      setResult(t('error', { message: error instanceof Error ? error.message : 'Unknown error' }))
     } finally {
       setLoading(false)
     }
@@ -196,7 +198,7 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
   const copyRichMenuId = async () => {
     if (!createdRichMenuId) return
     await navigator.clipboard.writeText(createdRichMenuId)
-    alert('リッチメニューIDをクリップボードにコピーしました')
+    alert(t('copiedIdToClipboard'))
   }
 
   const handleLinkToUser = async () => {
@@ -204,7 +206,7 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
     if (!client) return
 
     if (!testUserId || !testRichMenuId) {
-      setResult('エラー: User IDとリッチメニューIDを入力してください')
+      setResult(t('errorUserIdAndMenuIdRequired'))
       return
     }
 
@@ -213,9 +215,9 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
 
     try {
       await client.linkRichMenuToUser(testUserId, testRichMenuId)
-      setResult(`✓ ユーザー ${testUserId} にリッチメニュー ${testRichMenuId} をリンクしました`)
+      setResult(t('userLinked', { userId: testUserId, richMenuId: testRichMenuId }))
     } catch (error) {
-      setResult(`エラー: ${error instanceof Error ? error.message : '不明なエラー'}`)
+      setResult(t('error', { message: error instanceof Error ? error.message : 'Unknown error' }))
     } finally {
       setLoading(false)
     }
@@ -226,7 +228,7 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
     if (!client) return
 
     if (!testUserId) {
-      setResult('エラー: User IDを入力してください')
+      setResult(t('errorUserIdRequired'))
       return
     }
 
@@ -235,9 +237,9 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
 
     try {
       await client.unlinkRichMenuFromUser(testUserId)
-      setResult(`✓ ユーザー ${testUserId} からリッチメニューのリンクを解除しました`)
+      setResult(t('userUnlinked', { userId: testUserId }))
     } catch (error) {
-      setResult(`エラー: ${error instanceof Error ? error.message : '不明なエラー'}`)
+      setResult(t('error', { message: error instanceof Error ? error.message : 'Unknown error' }))
     } finally {
       setLoading(false)
     }
@@ -248,7 +250,7 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
     if (!client) return
 
     if (!testUserId) {
-      setResult('エラー: User IDを入力してください')
+      setResult(t('errorUserIdRequired'))
       return
     }
 
@@ -257,10 +259,10 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
 
     try {
       const response = await client.getUserRichMenu(testUserId)
-      setResult(`✓ ユーザー ${testUserId} にリンクされているリッチメニューID:\n${response.richMenuId}`)
+      setResult(t('userRichMenuId', { userId: testUserId, richMenuId: response.richMenuId }))
       setTestRichMenuId(response.richMenuId)
     } catch (error) {
-      setResult(`エラー: ${error instanceof Error ? error.message : '不明なエラー'}`)
+      setResult(t('error', { message: error instanceof Error ? error.message : 'Unknown error' }))
     } finally {
       setLoading(false)
     }
@@ -278,7 +280,7 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
           marginBottom: 16,
           fontSize: 13,
         }}>
-          <strong>注意:</strong> Worker URLが設定されていません。開発者モードでローカルのWorkerを使用してください。
+          {t('workerUrlMissing')}
         </div>
       )}
 
@@ -290,25 +292,25 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
             onChange={(e) => setDeveloperMode(e.target.checked)}
             style={{ marginRight: 8 }}
           />
-          <span>開発者モード（ローカルテスト用）</span>
+          <span>{t('developerMode')}</span>
         </label>
         <div style={{ fontSize: 11, color: '#666', marginTop: 4, marginLeft: 24 }}>
-          有効にすると、カスタムWorker URLを設定できます
+          {t('developerModeNote')}
         </div>
       </div>
 
       {developerMode && (
         <div className="field">
-          <label>Cloudflare Worker URL（開発者モード）</label>
+          <label>{t('cloudflareWorkerUrl')}</label>
           <input
             type="text"
             value={customWorkerUrl}
             onChange={(e) => setCustomWorkerUrl(e.target.value)}
-            placeholder="http://localhost:8787"
+            placeholder={t('cloudflareWorkerPlaceholder')}
             style={{ width: '100%' }}
           />
           <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
-            ローカル開発用: http://localhost:8787
+            {t('localDevNote')}
           </div>
         </div>
       )}
@@ -322,21 +324,21 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
           marginBottom: 12,
           fontSize: 12,
         }}>
-          ✓ サービス提供のAPIエンドポイントを使用中
+          {t('serviceApiInUse')}
         </div>
       )}
 
       <div className="field">
-        <label>チャンネルアクセストークン</label>
+        <label>{t('channelAccessToken')}</label>
         <input
           type="password"
           value={channelAccessToken}
           onChange={(e) => setChannelAccessToken(e.target.value)}
-          placeholder="Your channel access token"
+          placeholder={t('channelAccessTokenPlaceholder')}
           style={{ width: '100%' }}
         />
         <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
-          LINE Developersコンソールから取得
+          {t('getFromLineDevelopers')}
         </div>
       </div>
 
@@ -346,14 +348,14 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
           onClick={handleCreateRichMenu}
           disabled={loading || !workerUrl || !channelAccessToken}
         >
-          {loading ? '処理中...' : 'リッチメニューを作成'}
+          {loading ? t('processing') : t('createRichMenu')}
         </button>
         <button
           className="btn secondary"
           onClick={handleListRichMenus}
           disabled={loading || !workerUrl || !channelAccessToken}
         >
-          既存メニューを取得
+          {t('getExistingMenus')}
         </button>
       </div>
 
@@ -367,7 +369,7 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
             borderRadius: 4,
           }}
         >
-          <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 14 }}>作成されたリッチメニューID</div>
+          <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 14 }}>{t('createdRichMenuId')}</div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <input
               type="text"
@@ -388,11 +390,11 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
               onClick={copyRichMenuId}
               style={{ padding: '6px 12px', fontSize: 13 }}
             >
-              コピー
+              {t('copy')}
             </button>
           </div>
           <div style={{ fontSize: 12, color: '#666', marginTop: 6 }}>
-            このIDを他のサービスで使用できます
+            {t('useThisIdNote')}
           </div>
         </div>
       )}
@@ -402,8 +404,8 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
           style={{
             marginTop: 12,
             padding: 12,
-            background: result.includes('エラー') ? '#fee' : '#efe',
-            border: `1px solid ${result.includes('エラー') ? '#fcc' : '#cfc'}`,
+            background: result.toLowerCase().includes('error') || result.includes('エラー') ? '#fee' : '#efe',
+            border: `1px solid ${result.toLowerCase().includes('error') || result.includes('エラー') ? '#fcc' : '#cfc'}`,
             borderRadius: 4,
             whiteSpace: 'pre-wrap',
             fontSize: 13,
@@ -415,33 +417,33 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
 
       {/* Test: Link rich menu to specific user */}
       <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid #ddd' }}>
-        <h4 style={{ margin: '0 0 8px 0' }}>テスト機能：特定ユーザーへのリンク</h4>
+        <h4 style={{ margin: '0 0 8px 0' }}>{t('testFeatureTitle')}</h4>
         <div style={{ fontSize: 12, color: '#666', marginBottom: 12 }}>
-          特定のユーザーにリッチメニューをリンクしてテストできます
+          {t('testFeatureDescription')}
         </div>
 
         <div className="field">
-          <label>LINE User ID</label>
+          <label>{t('lineUserId')}</label>
           <input
             type="text"
             value={testUserId}
             onChange={(e) => setTestUserId(e.target.value)}
-            placeholder="U1234567890abcdef1234567890abcdef"
+            placeholder={t('lineUserIdPlaceholder')}
             style={{ width: '100%', fontFamily: 'monospace', fontSize: 13 }}
           />
           <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>
-            ※ テストユーザーのUser IDを入力（LINEチャットでユーザー情報を確認）
+            {t('lineUserIdNote')}
           </div>
         </div>
 
         <div className="field">
-          <label>リッチメニューID</label>
+          <label>{t('richMenuId')}</label>
           <div style={{ display: 'flex', gap: 6 }}>
             <input
               type="text"
               value={testRichMenuId}
               onChange={(e) => setTestRichMenuId(e.target.value)}
-              placeholder="richmenu-xxxxx"
+              placeholder={t('richMenuIdPlaceholder')}
               style={{ flex: 1, fontFamily: 'monospace', fontSize: 13 }}
             />
             {createdRichMenuId && (
@@ -450,7 +452,7 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
                 onClick={() => setTestRichMenuId(createdRichMenuId)}
                 style={{ padding: '6px 10px', fontSize: 12, whiteSpace: 'nowrap' }}
               >
-                作成したIDを使用
+                {t('useCreatedId')}
               </button>
             )}
           </div>
@@ -463,7 +465,7 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
             disabled={loading || !workerUrl || !channelAccessToken}
             style={{ padding: '6px 12px', fontSize: 13 }}
           >
-            ユーザーにリンク
+            {t('linkToUser')}
           </button>
           <button
             className="btn secondary"
@@ -471,7 +473,7 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
             disabled={loading || !workerUrl || !channelAccessToken}
             style={{ padding: '6px 12px', fontSize: 13 }}
           >
-            現在のリンクを確認
+            {t('checkCurrentLink')}
           </button>
           <button
             className="btn secondary"
@@ -479,7 +481,7 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
             disabled={loading || !workerUrl || !channelAccessToken}
             style={{ padding: '6px 12px', fontSize: 13, background: '#fff3cd', color: '#856404' }}
           >
-            リンク解除
+            {t('unlink')}
           </button>
         </div>
       </div>
@@ -487,9 +489,9 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
       {showRichMenus && richMenus.length > 0 && (
         <div style={{ marginTop: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <h4 style={{ margin: 0 }}>既存のリッチメニュー ({richMenus.length}件)</h4>
+            <h4 style={{ margin: 0 }}>{t('existingRichMenus', { count: richMenus.length.toString() })}</h4>
             <button className="btn secondary" onClick={() => setShowRichMenus(false)} style={{ padding: '4px 8px', fontSize: 12 }}>
-              閉じる
+              {t('close')}
             </button>
           </div>
           <div style={{ maxHeight: 500, overflow: 'auto', border: '1px solid #ddd', borderRadius: 4 }}>
@@ -513,16 +515,16 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
                       className="btn secondary"
                       onClick={() => {
                         navigator.clipboard.writeText(rm.richMenuId)
-                        alert('IDをコピーしました')
+                        alert(t('idCopied'))
                       }}
                       style={{ padding: '2px 6px', fontSize: 11 }}
                     >
-                      コピー
+                      {t('copy')}
                     </button>
                   </div>
-                  サイズ: {rm.size.width}x{rm.size.height}<br />
-                  チャットバー: {rm.chatBarText}<br />
-                  領域数: {rm.areas?.length || 0}
+                  {t('size')}: {rm.size.width}x{rm.size.height}<br />
+                  {t('chatBar')}: {rm.chatBarText}<br />
+                  {t('areaCount')}: {rm.areas?.length || 0}
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   <button
@@ -531,7 +533,7 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
                     disabled={loading || !onLoadRichMenu}
                     style={{ padding: '4px 8px', fontSize: 12 }}
                   >
-                    エディタで開く
+                    {t('openInEditor')}
                   </button>
                   <button
                     className="btn secondary"
@@ -539,7 +541,7 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
                     disabled={loading}
                     style={{ padding: '4px 8px', fontSize: 12 }}
                   >
-                    デフォルトに設定
+                    {t('setAsDefault')}
                   </button>
                   <button
                     className="btn secondary"
@@ -547,7 +549,7 @@ export default function LineApiPanel({ menu, imageUrl, onLoadRichMenu }: Props) 
                     disabled={loading}
                     style={{ padding: '4px 8px', fontSize: 12, background: '#fee', color: '#c00' }}
                   >
-                    削除
+                    {t('delete')}
                   </button>
                 </div>
               </div>

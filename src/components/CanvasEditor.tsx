@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Area } from '../types'
+import { useI18n } from '../i18n/useI18n'
 
 type Props = {
   imageUrl?: string
@@ -15,6 +16,7 @@ type Props = {
 }
 
 export default function CanvasEditor({ imageUrl, size, areas, setAreas, selectedId, setSelectedId, setImageNaturalSize, allowDraw = true, defaultOpen = false, chatBarText = 'Tap here' }: Props) {
+  const { t } = useI18n()
   const previewRef = useRef<HTMLDivElement | null>(null)
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const [scale, setScale] = useState(1)
@@ -67,9 +69,9 @@ export default function CanvasEditor({ imageUrl, size, areas, setAreas, selected
 
   const actionSummary = (a: Area) => {
     const act = a.action as any
-    if (act.type === 'uri') return `URL: ${act.uri || ''}`
-    if (act.type === 'message') return `メッセージ: ${act.text || ''}`
-    if (act.type === 'postback') return `ポストバック: ${act.data || ''}`
+    if (act.type === 'uri') return t('actionUri', { uri: act.uri || '' })
+    if (act.type === 'message') return t('actionMessage', { text: act.text || '' })
+    if (act.type === 'postback') return t('actionPostback', { data: act.data || '' })
     return act.type
   }
 
@@ -137,19 +139,19 @@ export default function CanvasEditor({ imageUrl, size, areas, setAreas, selected
   const simulateAction = (a: Area) => {
     const act = a.action as any
     if (act.type === 'message') {
-      pushChat(act.text || '(空のメッセージ)')
+      pushChat(act.text || t('emptyMessage'))
     } else if (act.type === 'uri') {
-      pushChat(`リンクを開く: ${act.uri || ''}`)
+      pushChat(t('openLink', { uri: act.uri || '' }))
       showToast(`URI: ${act.uri || ''}`)
     } else if (act.type === 'postback') {
-      pushChat(`ポストバック: ${act.data || ''}`)
+      pushChat(t('postbackAction', { data: act.data || '' }))
     } else if (act.type === 'datetimepicker') {
       const mode = act.mode || 'datetime'
-      pushChat(`日時選択 (${mode}) ${act.data || ''}`)
-      showToast(`日時選択: ${mode}`)
+      pushChat(t('datetimePickerAction', { mode, data: act.data || '' }))
+      showToast(t('datetimePicker'))
     } else if (act.type === 'richmenuswitch') {
-      pushChat(`リッチメニュー切替: ${act.richMenuId || '(unset)'}`)
-      showToast(`リッチメニュー切替`)
+      pushChat(t('richMenuSwitchAction', { richMenuId: act.richMenuId || '(unset)' }))
+      showToast(t('richMenuSwitch'))
     } else {
       pushChat(String(act.type || 'action'))
     }
@@ -387,17 +389,17 @@ export default function CanvasEditor({ imageUrl, size, areas, setAreas, selected
           <div style={{ width: 360, height: containerH + 300, position: 'relative' }}>
                 {/* header */}
                 <div style={{ height: 40, display: 'flex', alignItems: 'center', paddingLeft: 12, paddingRight: 12, background: '#f7f9fc', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                  <div style={{ fontWeight: 700, color: '#213547' }}>リッチメニューフォルダ</div>
+                  <div style={{ fontWeight: 700, color: '#213547' }}>{t('richMenuPreview')}</div>
                   <div style={{ marginLeft: 'auto' }}>
                     <button onClick={() => setEditMode(m => !m)} style={{ padding: '6px 10px', borderRadius: 8, border: 'none', background: editMode ? '#0f5a3f' : '#111827', color: '#fff', cursor: 'pointer' }}>
-                      {editMode ? '編集モード' : 'プレビューモード'}
+                      {editMode ? t('editMode') : t('previewMode')}
                     </button>
                   </div>
                 </div>
                 {/* chat area */}
                 <div ref={chatRef} style={{ height: 260, overflow: 'auto', background: '#e6eefc', padding: 12 }}>
                   {chatMessages.length === 0 ? (
-                    <div style={{ color: '#64748b' }}>チャットはここに表示されます。メニューの領域をクリックするとアクションがシミュレートされます。</div>
+                    <div style={{ color: '#64748b' }}>{t('chatPlaceholder')}</div>
                   ) : (
                     chatMessages.map(m => (
                       <div key={m.id} style={{ marginBottom: 8, display: 'flex' }}>

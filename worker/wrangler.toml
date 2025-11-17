@@ -2,6 +2,10 @@ name = "richmenu-api-worker"
 main = "index.ts"
 compatibility_date = "2024-01-01"
 
+# Development configuration
+[dev]
+port = 8787
+
 # Uncomment and configure if you need to specify a route
 # routes = [
 #   { pattern = "api.example.com/*", zone_name = "example.com" }

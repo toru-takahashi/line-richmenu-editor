@@ -7,11 +7,16 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },
-  "keywords": ["cloudflare", "worker", "line", "richmenu"],
+  "keywords": [
+    "cloudflare",
+    "worker",
+    "line",
+    "richmenu"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241127.0",
-    "wrangler": "^3.84.1"
+    "wrangler": "^4.47.0"
   }
 }

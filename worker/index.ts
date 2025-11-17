@@ -8,6 +8,7 @@ interface Env {
 }
 
 const LINE_API_BASE = 'https://api.line.me/v2/bot';
+const LINE_API_DATA_BASE = 'https://api-data.line.me/v2/bot';
 
 // Allowed origins for CORS (production only)
 const ALLOWED_ORIGINS = [
@@ -52,10 +53,13 @@ export default {
     const channelAccessToken = authHeader.substring(7);
 
     try {
+      console.log('Request:', request.method, path);
+
       // Route requests
       if (path === '/api/richmenu' && request.method === 'POST') {
         return await createRichMenu(request, channelAccessToken, corsHeaders);
       } else if (path.match(/^\/api\/richmenu\/[^\/]+\/content$/) && request.method === 'POST') {
+        console.log('Matched upload image route');
         const richMenuId = path.split('/')[3];
         return await uploadRichMenuImage(request, channelAccessToken, richMenuId, corsHeaders);
       } else if (path.match(/^\/api\/richmenu\/[^\/]+\/content$/) && request.method === 'GET') {
@@ -128,24 +132,30 @@ async function uploadRichMenuImage(
   richMenuId: string,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
+  console.log('uploadRichMenuImage called for richMenuId:', richMenuId);
+
   // Get the image data from the request
   const contentType = request.headers.get('Content-Type') || 'image/png';
   const imageData = await request.arrayBuffer();
 
-  const response = await fetch(`${LINE_API_BASE}/richmenu/${richMenuId}/content`, {
+  console.log('Image data size:', imageData.byteLength, 'bytes, Content-Type:', contentType);
+
+  const response = await fetch(`${LINE_API_DATA_BASE}/richmenu/${richMenuId}/content`, {
     method: 'POST',
     headers: {
       'Content-Type': contentType,
       Authorization: `Bearer ${token}`,
-      'Content-Length': imageData.byteLength.toString(),
     },
     body: imageData,
   });
+
+  console.log('LINE API response status:', response.status);
 
   if (response.ok) {
     return jsonResponse({ message: 'Image uploaded successfully' }, 200, corsHeaders);
   } else {
     const error = await response.text();
+    console.error('LINE API error:', error);
     return jsonResponse({ error: 'Failed to upload image', details: error }, response.status, corsHeaders);
   }
 }
@@ -158,7 +168,7 @@ async function downloadRichMenuImage(
   richMenuId: string,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
-  const response = await fetch(`${LINE_API_BASE}/richmenu/${richMenuId}/content`, {
+  const response = await fetch(`${LINE_API_DATA_BASE}/richmenu/${richMenuId}/content`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,

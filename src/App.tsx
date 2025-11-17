@@ -7,8 +7,11 @@ import JSONPanel from './components/JSONPanel'
 import LineApiPanel from './components/LineApiPanel'
 import PrivacyModal from './components/PrivacyModal'
 import { Area, RichMenu } from './types'
+import { useI18n } from './i18n/useI18n'
 
 export default function App() {
+  const { t, language, setLanguage } = useI18n()
+
   const [menu, setMenu] = useState<RichMenu>({
     size: { width: 2500, height: 1686 },
     selected: false,
@@ -181,12 +184,28 @@ export default function App() {
     <>
       <div className="topbar">
         <div style={{display:'flex',alignItems:'center',gap:8}}>
-          <div className="brandTitle">リッチメニュー エディタ</div>
+          <div className="brandTitle">{t('appTitle')}</div>
         </div>
         <div style={{marginLeft:'auto', display:'flex', alignItems:'center', gap:8}}>
-          <div style={{ fontSize:13, opacity:0.95 }}>マーケター向け — LINE用JSONをエクスポート</div>
-          <button className="btn secondary" onClick={() => setShowJson(s => !s)} style={{padding:'6px 10px'}}>JSONプレビュー</button>
-          <button className="btn" onClick={() => setShowLineApi(s => !s)} style={{padding:'6px 10px'}}>LINE API連携</button>
+          <div style={{ fontSize:13, opacity:0.95 }}>{t('appSubtitle')}</div>
+          {/* 言語セレクター */}
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as 'ja' | 'en')}
+            style={{
+              padding: '6px 10px',
+              borderRadius: 6,
+              border: '1px solid #ddd',
+              background: '#fff',
+              cursor: 'pointer',
+              fontSize: 13
+            }}
+          >
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+          </select>
+          <button className="btn secondary" onClick={() => setShowJson(s => !s)} style={{padding:'6px 10px'}}>{t('jsonPreview')}</button>
+          <button className="btn" onClick={() => setShowLineApi(s => !s)} style={{padding:'6px 10px'}}>{t('lineApiIntegration')}</button>
         </div>
       </div>
 
@@ -222,8 +241,8 @@ export default function App() {
           <div style={{position:'fixed',left:0,top:0,right:0,bottom:0,background:'rgba(0,0,0,0.4)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:120}} onClick={() => setShowJson(false)}>
             <div style={{width:'900px', maxWidth:'95%', maxHeight:'90%', background:'#fff', borderRadius:8, padding:16, overflow:'auto'}} onClick={(e) => e.stopPropagation()}>
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
-                <div style={{fontWeight:700}}>JSON プレビュー</div>
-                <button className="btn secondary" onClick={() => setShowJson(false)}>閉じる</button>
+                <div style={{fontWeight:700}}>{t('jsonPreview')}</div>
+                <button className="btn secondary" onClick={() => setShowJson(false)}>{t('close')}</button>
               </div>
               <JSONPanel
                 menu={{...menu, areas: areas.map(a => ({ bounds: a.bounds, action: a.action }))}}
@@ -238,8 +257,8 @@ export default function App() {
           <div style={{position:'fixed',left:0,top:0,right:0,bottom:0,background:'rgba(0,0,0,0.4)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:120}} onClick={() => setShowLineApi(false)}>
             <div style={{width:'900px', maxWidth:'95%', maxHeight:'90%', background:'#fff', borderRadius:8, padding:16, overflow:'auto'}} onClick={(e) => e.stopPropagation()}>
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
-                <div style={{fontWeight:700}}>LINE API 連携</div>
-                <button className="btn secondary" onClick={() => setShowLineApi(false)}>閉じる</button>
+                <div style={{fontWeight:700}}>{t('lineApiTitle')}</div>
+                <button className="btn secondary" onClick={() => setShowLineApi(false)}>{t('close')}</button>
               </div>
               <LineApiPanel
                 menu={{...menu, areas: areas.map(a => ({ bounds: a.bounds, action: a.action }))}}
@@ -270,7 +289,7 @@ export default function App() {
           color: '#666',
           zIndex: 100,
         }}>
-          <span>データはブラウザ内にのみ保存され、サーバーには送信されません</span>
+          <span>{t('dataPrivacyFooter')}</span>
           <button
             onClick={() => setShowPrivacy(true)}
             style={{
@@ -283,7 +302,7 @@ export default function App() {
               fontSize: 12,
             }}
           >
-            プライバシーと免責事項
+            {t('privacyAndDisclaimer')}
           </button>
         </div>
       </div>

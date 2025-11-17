@@ -1,5 +1,6 @@
 import React from 'react'
 import { RichMenu } from '../types'
+import { useI18n } from '../i18n/useI18n'
 
 type Props = {
   menu: RichMenu
@@ -9,6 +10,7 @@ type Props = {
 }
 
 export default function ImageSettings({ menu, setMenu, imageNaturalSize, setImageNaturalSize }: Props) {
+  const { t } = useI18n()
   // keep an error message for validation feedback
   const [imgError, setImgError] = React.useState<string | null>(null)
 
@@ -20,12 +22,12 @@ export default function ImageSettings({ menu, setMenu, imageNaturalSize, setImag
     // validations
     const allowed = ['image/jpeg', 'image/png']
     if (!allowed.includes(file.type)) {
-      setImgError('Only JPEG or PNG images are allowed.')
+      setImgError(t('onlyJpegPng'))
       return
     }
     const maxSize = 1 * 1024 * 1024 // 1MB
     if (file.size > maxSize) {
-      setImgError('File size must be 1MB or less.')
+      setImgError(t('fileSizeLimit'))
       return
     }
 
@@ -34,7 +36,7 @@ export default function ImageSettings({ menu, setMenu, imageNaturalSize, setImag
     reader.onload = () => {
       const result = reader.result as string | null
       if (!result) {
-        setImgError('Unable to read file')
+        setImgError(t('unableToRead'))
         return
       }
       const img = new Image()
@@ -44,15 +46,15 @@ export default function ImageSettings({ menu, setMenu, imageNaturalSize, setImag
         const h = img.naturalHeight
         const aspect = w / h
         if (w < 800 || w > 2500) {
-          setImgError('Image width must be between 800 and 2500 pixels.')
+          setImgError(t('imageWidthRange'))
           return
         }
         if (h < 250) {
-          setImgError('Image height must be at least 250 pixels.')
+          setImgError(t('imageHeightMinError'))
           return
         }
         if (aspect < 1.45) {
-          setImgError('Image aspect ratio (width/height) must be at least 1.45.')
+          setImgError(t('imageAspectRatioError'))
           return
         }
 
@@ -62,18 +64,18 @@ export default function ImageSettings({ menu, setMenu, imageNaturalSize, setImag
         setImageNaturalSize?.({ width: w, height: h })
       }
       img.onerror = () => {
-        setImgError('Unable to load image file.')
+        setImgError(t('unableToLoad'))
       }
     }
     reader.onerror = () => {
-      setImgError('Unable to read file.')
+      setImgError(t('unableToRead'))
     }
     reader.readAsDataURL(file)
   }
   return (
     <div>
       <div className="field">
-        <label>メニュー名</label>
+        <label>{t('menuName')}</label>
         <input
           type="text"
           value={menu.name}
@@ -82,7 +84,7 @@ export default function ImageSettings({ menu, setMenu, imageNaturalSize, setImag
       </div>
 
       <div className="field">
-        <label>開閉ボタンのテキスト</label>
+        <label>{t('chatBarText')}</label>
         <input
           type="text"
           value={menu.chatBarText}
@@ -91,46 +93,46 @@ export default function ImageSettings({ menu, setMenu, imageNaturalSize, setImag
       </div>
 
       <div className="field">
-        <label>デフォルトでメニューを開く</label>
+        <label>{t('defaultMenuOpen')}</label>
         <select
           value={menu.selected ? 'true' : 'false'}
           onChange={(e) => setMenu({ ...menu, selected: e.target.value === 'true' })}
         >
-          <option value="false">いいえ</option>
-          <option value="true">はい</option>
+          <option value="false">{t('no')}</option>
+          <option value="true">{t('yes')}</option>
         </select>
       </div>
 
       <div className="field">
-        <label>背景画像のURL</label>
+        <label>{t('backgroundImageUrl')}</label>
         <input
           type="text"
           value={menu.imageUrl || ''}
           onChange={(e) => setMenu({ ...menu, imageUrl: e.target.value })}
-          placeholder="https://... (CDN)"
+          placeholder={t('backgroundImageUrlPlaceholder')}
         />
         <div style={{marginTop:8}}>
-          <label style={{display:'block',fontSize:13,marginBottom:6}}>または画像をアップロード（JPEG/PNG、最大1MB）</label>
+          <label style={{display:'block',fontSize:13,marginBottom:6}}>{t('orUploadImage')}</label>
           <input type="file" accept="image/png,image/jpeg" onChange={handleFile} />
         </div>
         {imgError && <div className="hint">{imgError}</div>}
         {imageNaturalSize && (
-          <div className="small">画像サイズ: {imageNaturalSize.width} x {imageNaturalSize.height} px</div>
+          <div className="small">{t('imageSize')}: {imageNaturalSize.width} x {imageNaturalSize.height} px</div>
         )}
         {imageNaturalSize && (imageNaturalSize.width !== menu.size.width || imageNaturalSize.height !== menu.size.height) && (
-          <div className="hint">推奨サイズは {menu.size.width} x {menu.size.height} px です。異なるサイズの画像が選択されています。</div>
+          <div className="hint">{t('recommendedSize', { width: menu.size.width.toString(), height: menu.size.height.toString() })}</div>
         )}
         <div style={{marginTop:10}}>
-          <a href="https://www.canva.com/ja_jp/line-rich-menu/templates/" target="_blank" rel="noreferrer">Canva テンプレ</a>
+          <a href="https://www.canva.com/ja_jp/line-rich-menu/templates/" target="_blank" rel="noreferrer">{t('canvaTemplate')}</a>
         </div>
       </div>
         {/* 厳密な制約チェック */}
         {imageNaturalSize && (
           <div style={{marginTop:6}}>
-            {imageNaturalSize.width < 800 && <div className="hint">画像幅は少なくとも800px以上である必要があります。</div>}
-            {imageNaturalSize.width > 2500 && <div className="hint">画像幅は2500px以下である必要があります。</div>}
-            {imageNaturalSize.height < 250 && <div className="hint">画像高さは250px以上である必要があります。</div>}
-            {imageNaturalSize.width / imageNaturalSize.height < 1.45 && <div className="hint">画像のアスペクト比（幅÷高さ）は1.45以上である必要があります。</div>}
+            {imageNaturalSize.width < 800 && <div className="hint">{t('imageWidthMin')}</div>}
+            {imageNaturalSize.width > 2500 && <div className="hint">{t('imageWidthMax')}</div>}
+            {imageNaturalSize.height < 250 && <div className="hint">{t('imageHeightMin')}</div>}
+            {imageNaturalSize.width / imageNaturalSize.height < 1.45 && <div className="hint">{t('imageAspectRatio')}</div>}
           </div>
         )}
     </div>

@@ -38,7 +38,7 @@ export default function JSONPanel({ menu, setMenu }: Props) {
       if (typeof a.data !== 'string') errs.push(t('datetimeDataRequired'))
       if (!['date', 'time', 'datetime'].includes(a.mode)) errs.push(t('datetimeModeInvalid'))
     } else if (actionType === 'richmenuswitch') {
-      if (!a.richMenuId || typeof a.richMenuId !== 'string') errs.push(t('richMenuIdRequired'))
+      if (!a.richMenuAliasId || typeof a.richMenuAliasId !== 'string') errs.push(t('richMenuAliasIdRequired'))
     } else {
       errs.push(t('unsupportedActionType', { type: actionType }))
     }

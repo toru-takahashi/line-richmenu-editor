@@ -69,6 +69,7 @@ export const ja = {
   initialValue: '初期値',
   minMax: '最小 / 最大',
   switchTargetMenuId: '切替先リッチメニューID',
+  switchTargetMenuAliasId: '切替先リッチメニューエイリアスID',
   dataOptional: 'データ (任意)',
 
   // Action summaries
@@ -76,7 +77,7 @@ export const ja = {
   actionMessage: 'メッセージ: {text}',
   actionPostback: 'ポストバック: {data}',
   actionDatetimepicker: '日時選択: {mode} {data}',
-  actionRichmenuswitch: 'リッチメニュー切替: {richMenuId}',
+  actionRichmenuswitch: 'リッチメニュー切替: {richMenuAliasId}',
 
   // TemplatesPanel
   templates: 'テンプレート',
@@ -123,6 +124,7 @@ export const ja = {
   datetimeDataRequired: '日時選択アクションには data が必要です',
   datetimeModeInvalid: 'datetimepicker.mode は date|time|datetime のいずれかである必要があります',
   richMenuIdRequired: 'richmenuswitch には richMenuId が必要です',
+  richMenuAliasIdRequired: 'richmenuswitch には richMenuAliasId が必要です',
   unsupportedActionType: '未対応のアクション種別: {type}',
   invalidMenuObject: '無効なメニューオブジェクト',
   invalidSize: 'size が不正です',
@@ -300,6 +302,7 @@ export const en: Translations = {
   initialValue: 'Initial Value',
   minMax: 'Min / Max',
   switchTargetMenuId: 'Target Rich Menu ID',
+  switchTargetMenuAliasId: 'Target Rich Menu Alias ID',
   dataOptional: 'Data (Optional)',
 
   // Action summaries
@@ -307,7 +310,7 @@ export const en: Translations = {
   actionMessage: 'Message: {text}',
   actionPostback: 'Postback: {data}',
   actionDatetimepicker: 'Datetime: {mode} {data}',
-  actionRichmenuswitch: 'Rich Menu Switch: {richMenuId}',
+  actionRichmenuswitch: 'Rich Menu Switch: {richMenuAliasId}',
 
   // TemplatesPanel
   templates: 'Templates',
@@ -354,6 +357,7 @@ export const en: Translations = {
   datetimeDataRequired: 'Datetime picker action requires data',
   datetimeModeInvalid: 'datetimepicker.mode must be date|time|datetime',
   richMenuIdRequired: 'richmenuswitch requires richMenuId',
+  richMenuAliasIdRequired: 'richmenuswitch requires richMenuAliasId',
   unsupportedActionType: 'Unsupported action type: {type}',
   invalidMenuObject: 'Invalid menu object',
   invalidSize: 'Invalid size',

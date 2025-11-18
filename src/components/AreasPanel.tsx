@@ -22,7 +22,7 @@ function ActionForm({ action, onChange }: { action: LineAction; onChange: (a: Li
             if (type === 'message') onChange({ type: 'message', text: '' })
             if (type === 'postback') onChange({ type: 'postback', data: '', displayText: '', label: '', display: 'none' })
             if (type === 'datetimepicker') onChange({ type: 'datetimepicker', data: '', mode: 'datetime', initial: '', min: '', max: '' })
-            if (type === 'richmenuswitch') onChange({ type: 'richmenuswitch', richMenuId: '', data: '' })
+            if (type === 'richmenuswitch') onChange({ type: 'richmenuswitch', richMenuAliasId: '', data: '' })
           }}>
           <option value="uri">{t('openUrl')}</option>
           <option value="message">{t('sendMessage')}</option>
@@ -122,8 +122,8 @@ function ActionForm({ action, onChange }: { action: LineAction; onChange: (a: Li
       {actionType === 'richmenuswitch' && (
         <div>
           <div className="field">
-            <label>{t('switchTargetMenuId')}</label>
-            <input type="text" value={(action as any).richMenuId || ''} onChange={(e) => onChange({ ...(action as any), richMenuId: e.target.value })} />
+            <label>{t('switchTargetMenuAliasId')}</label>
+            <input type="text" value={(action as any).richMenuAliasId || ''} onChange={(e) => onChange({ ...(action as any), richMenuAliasId: e.target.value })} placeholder="Rich Menu Alias ID" />
           </div>
           <div className="field">
             <label>{t('dataOptional')}</label>
@@ -145,7 +145,7 @@ export default function AreasPanel({ areas, setAreas, selectedId, setSelectedId 
     if (act.type === 'message') return t('actionMessage', { text: act.text || '' })
     if (act.type === 'postback') return t('actionPostback', { data: act.data || '' })
     if (act.type === 'datetimepicker') return t('actionDatetimepicker', { mode: act.mode || 'datetime', data: act.data || '' })
-    if (act.type === 'richmenuswitch') return t('actionRichmenuswitch', { richMenuId: act.richMenuId || '' })
+    if (act.type === 'richmenuswitch') return t('actionRichmenuswitch', { richMenuAliasId: act.richMenuAliasId || '' })
     return act.type
   }
 

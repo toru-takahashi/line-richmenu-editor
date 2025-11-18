@@ -24,6 +24,13 @@
 - Canva の LINE リッチメニューテンプレート（デザインの参考・素材）：
 	https://www.canva.com/ja_jp/line-rich-menu/templates/
 
+## Treasure Data 統合ガイド
+
+Treasure Data の Audience Studio を使ってセグメント別にリッチメニューを配信する方法については、以下のガイドをご覧ください：
+
+- 📘 [日本語ガイド](docs/TREASURE_DATA_INTEGRATION.md)
+- 📗 [English Guide](docs/TREASURE_DATA_INTEGRATION_EN.md)
+
 ## セットアップと使い方
 
 ### ローカル開発

@@ -267,6 +267,16 @@ export default function App() {
         {/* Footer */}
         <div className="fixed bottom-0 left-0 right-0 z-[100] flex items-center justify-center gap-4 border-t border-neutral-3 bg-white/95 px-4 py-2 text-xs text-neutral-8 backdrop-blur-sm">
           <span>{t('dataPrivacyFooter')}</span>
+          <span className="text-neutral-6">|</span>
+          <a
+            href={language === 'ja' ? 'https://github.com/toru-takahashi/line-richmenu-editor/blob/main/docs/TREASURE_DATA_INTEGRATION.md' : 'https://github.com/toru-takahashi/line-richmenu-editor/blob/main/docs/TREASURE_DATA_INTEGRATION_EN.md'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cursor-pointer text-xs text-td-blue-600 underline hover:text-td-blue-700"
+          >
+            {t('treasureDataGuide')}
+          </a>
+          <span className="text-neutral-6">|</span>
           <button
             onClick={() => setShowPrivacy(true)}
             className="cursor-pointer border-0 bg-transparent p-0 text-xs text-td-blue-600 underline hover:text-td-blue-700"

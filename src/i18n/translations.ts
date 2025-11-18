@@ -10,6 +10,7 @@ export const ja = {
   lineApiIntegration: 'LINE API連携',
   close: '閉じる',
   dataPrivacyFooter: 'データはブラウザ内にのみ保存され、サーバーには送信されません',
+  treasureDataGuide: 'Treasure Data統合ガイド',
   privacyAndDisclaimer: 'プライバシーと免責事項',
 
   // ImageSettings
@@ -243,6 +244,7 @@ export const en: Translations = {
   lineApiIntegration: 'LINE API Integration',
   close: 'Close',
   dataPrivacyFooter: 'Data is stored only in your browser and is never sent to servers',
+  treasureDataGuide: 'Treasure Data Integration Guide',
   privacyAndDisclaimer: 'Privacy & Disclaimer',
 
   // ImageSettings

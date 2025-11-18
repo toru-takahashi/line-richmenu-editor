@@ -16,6 +16,49 @@ export interface RichMenuListResponse {
   richmenus: any[];
 }
 
+export interface RichMenuAlias {
+  richMenuAliasId: string;
+  richMenuId: string;
+}
+
+export interface RichMenuAliasListResponse {
+  aliases: RichMenuAlias[];
+}
+
+export interface ErrorDetail {
+  message: string;
+  property: string;
+}
+
+export interface LineApiErrorResponse {
+  message: string;
+  details?: ErrorDetail[];
+}
+
+export class LineApiError extends Error {
+  public details?: ErrorDetail[];
+  public fullResponse?: LineApiErrorResponse;
+
+  constructor(message: string, errorResponse?: LineApiErrorResponse) {
+    super(message);
+    this.name = 'LineApiError';
+    this.details = errorResponse?.details;
+    this.fullResponse = errorResponse;
+  }
+
+  public getDetailedMessage(): string {
+    if (!this.details || this.details.length === 0) {
+      return this.message;
+    }
+
+    const detailsText = this.details
+      .map((detail, index) => `  ${index + 1}. ${detail.property}: ${detail.message}`)
+      .join('\n');
+
+    return `${this.message}\n\n詳細 / Details:\n${detailsText}`;
+  }
+}
+
 export class LineApiClient {
   private config: ApiConfig;
 
@@ -41,8 +84,11 @@ export class LineApiClient {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || error.error || 'Failed to create rich menu');
+      const errorResponse: LineApiErrorResponse = await response.json();
+      throw new LineApiError(
+        errorResponse.message || 'Failed to create rich menu',
+        errorResponse
+      );
     }
 
     return response.json();
@@ -62,8 +108,11 @@ export class LineApiClient {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || error.error || 'Failed to upload image');
+      const errorResponse: LineApiErrorResponse = await response.json();
+      throw new LineApiError(
+        errorResponse.message || 'Failed to upload image',
+        errorResponse
+      );
     }
   }
 
@@ -246,6 +295,108 @@ export class LineApiClient {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || error.error || 'Failed to get user rich menu');
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Get list of all rich menu aliases
+   */
+  async listRichMenuAliases(): Promise<RichMenuAliasListResponse> {
+    const response = await fetch(`${this.config.workerUrl}/api/richmenu/alias/list`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${this.config.channelAccessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorResponse: LineApiErrorResponse = await response.json();
+      throw new LineApiError(
+        errorResponse.message || 'Failed to list rich menu aliases',
+        errorResponse
+      );
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Create a new rich menu alias
+   */
+  async createRichMenuAlias(richMenuAliasId: string, richMenuId: string): Promise<void> {
+    const response = await fetch(`${this.config.workerUrl}/api/richmenu/alias`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ richMenuAliasId, richMenuId }),
+    });
+
+    if (!response.ok) {
+      const errorResponse: LineApiErrorResponse = await response.json();
+      throw new LineApiError(
+        errorResponse.message || 'Failed to create rich menu alias',
+        errorResponse
+      );
+    }
+  }
+
+  /**
+   * Update an existing rich menu alias
+   */
+  async updateRichMenuAlias(richMenuAliasId: string, richMenuId: string): Promise<void> {
+    const response = await fetch(`${this.config.workerUrl}/api/richmenu/alias/${richMenuAliasId}`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ richMenuId }),
+    });
+
+    if (!response.ok) {
+      const errorResponse: LineApiErrorResponse = await response.json();
+      throw new LineApiError(
+        errorResponse.message || 'Failed to update rich menu alias',
+        errorResponse
+      );
+    }
+  }
+
+  /**
+   * Delete a rich menu alias
+   */
+  async deleteRichMenuAlias(richMenuAliasId: string): Promise<void> {
+    const response = await fetch(`${this.config.workerUrl}/api/richmenu/alias/${richMenuAliasId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${this.config.channelAccessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorResponse: LineApiErrorResponse = await response.json();
+      throw new LineApiError(
+        errorResponse.message || 'Failed to delete rich menu alias',
+        errorResponse
+      );
+    }
+  }
+
+  /**
+   * Get a specific rich menu alias by ID
+   */
+  async getRichMenuAlias(richMenuAliasId: string): Promise<RichMenuAlias> {
+    const response = await fetch(`${this.config.workerUrl}/api/richmenu/alias/${richMenuAliasId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${this.config.channelAccessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorResponse: LineApiErrorResponse = await response.json();
+      throw new LineApiError(
+        errorResponse.message || 'Failed to get rich menu alias',
+        errorResponse
+      );
     }
 
     return response.json();

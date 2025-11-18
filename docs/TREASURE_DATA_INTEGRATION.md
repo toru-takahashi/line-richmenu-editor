@@ -39,7 +39,25 @@
      - URLを開く
      - メッセージを送信
      - ポストバック
-     - **リッチメニュー切り替え** ← セグメント配信で重要
+     - **リッチメニュー切り替え** ← ユーザーの行動に応じて動的にメニューを切り替える
+
+   **リッチメニュー切り替えアクションの設定方法:**
+
+   a. **Rich Menu Editorでアクション設定**
+      ```
+      アクションタイプ: Rich Menu Switch
+      Target Rich Menu Alias ID: next-menu-alias
+      Data: user-action-data
+      ```
+
+   b. **LINE Developers Consoleでエイリアス設定**
+      ```
+      Messaging API > Rich menus > Rich menu aliases
+      Rich Menu ID: richmenu-xxxxx
+      Alias: next-menu-alias
+      ```
+
+   c. **ユーザーがタップすると、指定したエイリアスのリッチメニューに自動的に切り替わります**
 
 5. **JSONをエクスポート**
    - 「JSON Preview」ボタンをクリック
@@ -47,85 +65,47 @@
 
 ---
 
-## ステップ2: LINE Developersでリッチメニュー登録
+## ステップ2: Channel Access Tokenを取得
 
-### 2.1 LINE Official Account Managerを使用する場合
-
-1. **LINE Official Account Managerにログイン**
-   - https://manager.line.biz/
-
-2. **リッチメニューを作成**
-   - ホーム > リッチメニュー > 作成
-   - ステップ1で作成した画像とアクション設定を入力
-
-3. **リッチメニューIDを取得**
-   - 作成後、リッチメニュー一覧からIDをコピー
-   - 形式: `richmenu-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
-
-### 2.2 LINE Messaging APIを使用する場合（推奨）
+### 2.1 LINE Developers Consoleにアクセス
 
 1. **LINE Developers Consoleにログイン**
    - https://developers.line.biz/console/
 
 2. **Channel Access Tokenを取得**
-   ```
-   Settings > Messaging API > Channel access token
-   ```
+   - チャンネルを選択
+   - `Messaging API` タブを開く
+   - `Channel access token` セクションで「Issue」または「発行」をクリック
+   - 発行されたトークンをコピー
 
-3. **リッチメニューをAPI経由で作成**
-
-   本アプリの「LINE API Integration」機能を使用:
-
-   a. **Channel Access Tokenを入力**
-
-   b. **Create Rich Menu**をクリック
-
-   c. **Rich Menu IDをコピー**
-      - 形式: `richmenu-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
-      - このIDをTreasure Dataで使用します
-
-4. **画像をアップロード**
-   - Upload Rich Menu Image機能を使用
-   - または、APIパネルから手動でアップロード
+   ⚠️ **注意**: トークンは一度しか表示されないため、必ずコピーして安全な場所に保存してください
 
 ---
 
-## ステップ3: Treasure Dataでセグメント作成
+## ステップ3: リッチメニューを作成・登録
 
-### 3.1 Audience Studioでセグメントを定義
+### 3.1 本アプリの「LINE API連携」機能を使用
 
-1. **Audience Studioにアクセス**
-   ```
-   Treasure Data Console > Audiences > Segments
-   ```
+1. **Rich Menu Editorで「LINE API連携」を開く**
+   - アプリ右上の「LINE API連携」ボタンをクリック
 
-2. **新規セグメントを作成**
+2. **Channel Access Tokenを入力**
+   - ステップ2で取得したトークンを入力欄に貼り付け
 
-   **例1: VIPユーザー**
-   ```sql
-   SELECT
-     user_id,
-     line_user_id
-   FROM
-     user_master
-   WHERE
-     total_purchase_amount >= 100000
-     AND last_purchase_date >= TD_TIME_ADD(TD_SCHEDULED_TIME(), '-30d')
-   ```
+3. **リッチメニューを作成**
+   - 「リッチメニューを作成」ボタンをクリック
+   - アプリが自動的に以下を実行します：
+     - LINE APIにリッチメニューを作成
+     - 背景画像を自動アップロード
+     - Rich Menu IDを取得
 
-   **例2: 新規ユーザー**
-   ```sql
-   SELECT
-     user_id,
-     line_user_id
-   FROM
-     user_master
-   WHERE
-     registration_date >= TD_TIME_ADD(TD_SCHEDULED_TIME(), '-7d')
-   ```
+4. **Rich Menu IDをコピー**
+   - 作成成功後、Rich Menu IDが表示されます
+   - 形式: `richmenu-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+   - 「コピー」ボタンでクリップボードにコピー
+   - **このIDをTreasure Dataで使用します**
 
-3. **セグメント名を設定**
-   - 例: `line_vip_users`, `line_new_users`
+   ⚠️ **注意**: API経由で作成したリッチメニューはLINE Developers Consoleの管理画面には表示されません。本アプリの「既存メニューを取得」機能で確認できます。
 
 ---
 
@@ -138,43 +118,56 @@
    Treasure Data Console > Integrations > Catalog
    ```
 
-2. **LINE Messaging APIを検索**
-   - 「LINE Messaging API」を選択
+2. **LINE Messaging APIを検索して選択**
 
 3. **基本設定**
    ```
-   Name: LINE Rich Menu - VIP Users
-   Description: VIPユーザー向けリッチメニュー配信
+   Name: LINE Rich Menu Delivery
+   Description: リッチメニュー配信用コネクタ
    ```
 
 ### 4.2 認証情報の設定
 
-1. **Channel Access Tokenを入力**
-   ```
-   LINE Developers Console > Settings > Messaging API
-   → Channel access token をコピーして貼り付け
-   ```
+**Channel Access Tokenを入力**
+- ステップ2で取得したトークンを貼り付け
 
 ### 4.3 リッチメニュー配信設定
 
-1. **アクションタイプを選択**
+1. **アクションタイプ**
    ```
    Action Type: Link Rich Menu
    ```
 
-2. **リッチメニューIDを指定**
+2. **リッチメニューID**
    ```
    Rich Menu ID: richmenu-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    ```
-   ⚠️ **重要**: ステップ2で取得したリッチメニューIDを正確に入力
+   ⚠️ **重要**: ステップ3で取得したリッチメニューIDを正確に入力
 
 3. **マッピング設定**
    ```
    User ID Column: line_user_id
-   (Treasure Dataのテーブルに含まれるLINEユーザーIDのカラム名)
    ```
 
-### 4.4 配信スケジュール設定
+---
+
+## ステップ5: Treasure Dataでセグメント作成
+
+### 5.1 Audience Studioでセグメントを定義
+
+1. **Audience Studioにアクセス**
+   ```
+   Treasure Data Console > Audiences > Segments
+   ```
+
+2. **新規セグメントを作成**
+   - セグメントクエリで `user_id` と `line_user_id` を含むテーブルを作成
+   - 配信対象の条件（購入金額、登録日など）を指定
+
+3. **セグメント名を設定**
+   - 例: `line_vip_users`, `line_new_users`
+
+### 5.2 配信スケジュール設定
 
 1. **スケジュールを設定**
    ```
@@ -183,14 +176,14 @@
    Start Time: 09:00
    ```
 
-2. **セグメントを選択**
-   - ステップ3で作成したセグメントを選択
+2. **コネクタを選択**
+   - ステップ4で作成したコネクタを選択
 
 ---
 
-## ステップ5: Audience Studioでアクティベーション
+## ステップ6: Audience Studioでアクティベーション
 
-### 5.1 オーディエンスアクティベーション
+### 6.1 オーディエンスアクティベーション
 
 1. **Audience > Activations**にアクセス
 
@@ -204,7 +197,7 @@
 3. **配信を開始**
    - 「Activate」ボタンをクリック
 
-### 5.2 配信状況の確認
+### 6.2 配信状況の確認
 
 1. **Activation Historyで確認**
    ```
@@ -215,47 +208,35 @@
 
 ---
 
-## ステップ6: セグメント別リッチメニュー切り替え
+## ステップ7: 複数セグメントへの配信
 
-### 6.1 複数リッチメニューの管理
+### 7.1 基本ルール
 
-異なるセグメントに異なるリッチメニューを配信する場合:
+**重要:** 1つのActivationで設定できるリッチメニューは1つのみです。
 
-**パターン1: ユーザー属性別**
 ```
-VIPユーザー    → richmenu-vip-xxxxx (特別オファー付き)
-通常ユーザー   → richmenu-standard-xxxxx (基本メニュー)
-新規ユーザー   → richmenu-welcome-xxxxx (チュートリアル付き)
+1セグメント = 1リッチメニュー = 1Activation
 ```
 
-**パターン2: 行動履歴別**
-```
-購入済み      → richmenu-purchased-xxxxx (リピート促進)
-カート放棄    → richmenu-cart-abandoned-xxxxx (購入促進)
-閲覧のみ      → richmenu-browsed-xxxxx (興味喚起)
-```
+### 7.2 複数セグメントに配信する場合
 
-### 6.2 リッチメニュー切り替えアクション
+異なるセグメントに異なるリッチメニューを配信する場合は、**各セグメントごとにステップ1〜6を繰り返します**。
 
-ユーザーの行動に応じて動的にメニューを切り替える場合:
+**例: 3つのセグメントに配信する場合**
 
-1. **Rich Menu Editorでアクション設定**
-   ```
-   アクションタイプ: Rich Menu Switch
-   Target Rich Menu Alias ID: next-menu-alias
-   Data: user-action-data
-   ```
+| セグメント | リッチメニューID | Activation名 |
+|-----------|----------------|-------------|
+| VIPユーザー | richmenu-vip-xxxxx | LINE Rich Menu - VIP Users |
+| 通常ユーザー | richmenu-standard-xxxxx | LINE Rich Menu - Standard Users |
+| 新規ユーザー | richmenu-welcome-xxxxx | LINE Rich Menu - New Users |
 
-2. **LINE Developers Consoleでエイリアス設定**
-   ```
-   Rich Menu ID: richmenu-xxxxx
-   Alias: next-menu-alias
-   ```
-
-3. **Treasure Dataで切り替えトリガー設定**
-   - Webhookでポストバックデータを受信
-   - セグメントを動的に更新
-   - 新しいリッチメニューを配信
+**手順:**
+1. VIPユーザー向けリッチメニューを作成（ステップ1〜3）
+2. VIPユーザー向けConnectorを作成（ステップ4）
+3. VIPユーザーセグメントを作成（ステップ5）
+4. VIPユーザー向けActivationを実行（ステップ6）
+5. 通常ユーザーについて1〜4を繰り返し
+6. 新規ユーザーについて1〜4を繰り返し
 
 ---
 
@@ -307,59 +288,6 @@ VIPユーザー    → richmenu-vip-xxxxx (特別オファー付き)
      ┌─────────┐
      │ User B  │ Standard Menu
      └─────────┘
-```
-
----
-
-## ベストプラクティス
-
-### 1. リッチメニュー設計
-
-✅ **DO**
-- ユーザーセグメントごとに明確な価値提案を提供
-- タップ領域は指で押しやすい大きさ（最小100x100px）
-- 重要なアクションは目立つ位置に配置
-- 画像とアクション設定を事前にテスト
-
-❌ **DON'T**
-- 20個を超えるタップ領域を設定しない
-- 小さすぎるタップ領域を作らない
-- セグメント間で全く異なるデザインにしない（ブランド一貫性）
-
-### 2. セグメント管理
-
-✅ **DO**
-- セグメント定義を明確に文書化
-- セグメントサイズを定期的にモニタリング
-- オーバーラップを避ける（ユーザーが複数セグメントに属さない）
-- セグメント更新頻度を適切に設定
-
-❌ **DON'T**
-- 小さすぎるセグメント（<100ユーザー）を作成しない
-- 過度に複雑なセグメント条件を避ける
-- リアルタイム配信が必要ない場合にリアルタイム更新しない
-
-### 3. 配信スケジュール
-
-✅ **DO**
-- ユーザーのアクティブ時間帯に配信
-- A/Bテストで最適な配信タイミングを検証
-- 配信後の効果測定を実施
-
-❌ **DON'T**
-- 深夜や早朝の配信を避ける
-- 同じユーザーに短期間で複数回配信しない
-- 配信エラーのリトライ設定を忘れない
-
-### 4. モニタリング
-
-以下の指標を定期的に確認:
-
-```
-- 配信成功率: (成功数 / 試行数) × 100
-- タップ率: タップ数 / 表示数
-- コンバージョン率: 購入数 / タップ数
-- エラー率: エラー数 / 試行数
 ```
 
 ---

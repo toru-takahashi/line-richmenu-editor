@@ -22,13 +22,15 @@ function ActionForm({ action, onChange }: { action: LineAction; onChange: (a: Li
             if (type === 'message') onChange({ type: 'message', text: '' })
             if (type === 'postback') onChange({ type: 'postback', data: '', displayText: '', label: '', display: 'none' })
             if (type === 'datetimepicker') onChange({ type: 'datetimepicker', data: '', mode: 'datetime', initial: '', min: '', max: '' })
-            if (type === 'richmenuswitch') onChange({ type: 'richmenuswitch', richMenuAliasId: '', data: '' })
+            if (type === 'richmenuswitch') onChange({ type: 'richmenuswitch', richMenuAliasId: '', data: 'richmenu-switch' })
+            if (type === 'clipboard') onChange({ type: 'clipboard', clipboardText: '' })
           }}>
           <option value="uri">{t('openUrl')}</option>
           <option value="message">{t('sendMessage')}</option>
           <option value="postback">{t('postback')}</option>
           <option value="datetimepicker">{t('datetimePicker')}</option>
           <option value="richmenuswitch">{t('richMenuSwitch')}</option>
+          <option value="clipboard">{t('clipboard')}</option>
         </select>
       </div>
 
@@ -123,11 +125,38 @@ function ActionForm({ action, onChange }: { action: LineAction; onChange: (a: Li
         <div>
           <div className="field">
             <label>{t('switchTargetMenuAliasId')}</label>
-            <input type="text" value={(action as any).richMenuAliasId || ''} onChange={(e) => onChange({ ...(action as any), richMenuAliasId: e.target.value })} placeholder="Rich Menu Alias ID" />
+            <input
+              type="text"
+              value={(action as any).richMenuAliasId || ''}
+              onChange={(e) => onChange({ ...(action as any), richMenuAliasId: e.target.value })}
+              placeholder="e.g., main-menu, vip-menu"
+              maxLength={32}
+            />
+            <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>
+              {t('richMenuAliasIdNote')}
+            </div>
           </div>
           <div className="field">
-            <label>{t('dataOptional')}</label>
+            <label>{t('data')}</label>
             <input type="text" value={(action as any).data || ''} onChange={(e) => onChange({ ...(action as any), data: e.target.value })} />
+            <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>
+              {t('richMenuSwitchDataNote')}
+            </div>
+          </div>
+        </div>
+      )}
+      {actionType === 'clipboard' && (
+        <div className="field">
+          <label>{t('clipboardText')}</label>
+          <input
+            type="text"
+            value={(action as any).clipboardText || ''}
+            onChange={(e) => onChange({ type: 'clipboard', clipboardText: e.target.value })}
+            placeholder={t('clipboardTextPlaceholder')}
+            maxLength={1000}
+          />
+          <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>
+            {t('clipboardTextNote')}
           </div>
         </div>
       )}
@@ -146,6 +175,7 @@ export default function AreasPanel({ areas, setAreas, selectedId, setSelectedId 
     if (act.type === 'postback') return t('actionPostback', { data: act.data || '' })
     if (act.type === 'datetimepicker') return t('actionDatetimepicker', { mode: act.mode || 'datetime', data: act.data || '' })
     if (act.type === 'richmenuswitch') return t('actionRichmenuswitch', { richMenuAliasId: act.richMenuAliasId || '' })
+    if (act.type === 'clipboard') return t('actionClipboard', { text: act.clipboardText || '' })
     return act.type
   }
 

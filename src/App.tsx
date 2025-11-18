@@ -96,6 +96,7 @@ export default function App() {
   const prevImageUrlRef = React.useRef<string | null>(null)
   // creation is canvas-only
   const [createMode] = useState<'draw' | 'manual'>('draw')
+  const [currentRichMenuId, setCurrentRichMenuId] = useState<string | null>(null)
 
   // load saved session from localStorage (menu + areas)
   React.useEffect(() => {
@@ -148,7 +149,7 @@ export default function App() {
   }, [areas])
 
   // Load a rich menu from LINE API into the editor
-  const handleLoadRichMenu = (richMenu: RichMenu, imageDataUrl?: string) => {
+  const handleLoadRichMenu = (richMenu: RichMenu, imageDataUrl?: string, richMenuId?: string) => {
     // Update menu settings
     setMenu({
       size: richMenu.size,
@@ -166,6 +167,9 @@ export default function App() {
       action: area.action
     }))
     setAreas(newAreas)
+
+    // Store the rich menu ID
+    setCurrentRichMenuId(richMenuId || null)
 
     // Reset selection
     setSelectedId(null)
@@ -187,7 +191,14 @@ export default function App() {
           <div className="brandTitle">{t('appTitle')}</div>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <div className="text-sm opacity-95">{t('appSubtitle')}</div>
+          <a
+            href="https://github.com/toru-takahashi/line-richmenu-editor#readme"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm opacity-95 underline hover:opacity-100 transition-opacity"
+          >
+            {t('documentation')}
+          </a>
           {/* Language selector */}
           <select
             value={language}
@@ -256,6 +267,7 @@ export default function App() {
                 menu={{...menu, areas: areas.map(a => ({ bounds: a.bounds, action: a.action }))}}
                 imageUrl={menu.imageUrl}
                 onLoadRichMenu={handleLoadRichMenu}
+                currentRichMenuId={currentRichMenuId}
               />
             </div>
           </div>
@@ -283,6 +295,15 @@ export default function App() {
           >
             {t('privacyAndDisclaimer')}
           </button>
+          <span className="text-neutral-6">|</span>
+          <a
+            href="https://github.com/toru-takahashi"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cursor-pointer text-xs text-td-blue-600 underline hover:text-td-blue-700"
+          >
+            {t('contactInfo')}
+          </a>
         </div>
       </div>
     </>

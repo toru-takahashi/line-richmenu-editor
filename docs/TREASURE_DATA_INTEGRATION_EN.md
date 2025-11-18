@@ -39,7 +39,25 @@ This guide explains how to distribute different rich menus to segmented users us
      - Open URL
      - Send message
      - Postback
-     - **Rich Menu Switch** ← Important for segment distribution
+     - **Rich Menu Switch** ← Dynamically switch menus based on user actions
+
+   **How to Configure Rich Menu Switch Action:**
+
+   a. **Configure Action in Rich Menu Editor**
+      ```
+      Action Type: Rich Menu Switch
+      Target Rich Menu Alias ID: next-menu-alias
+      Data: user-action-data
+      ```
+
+   b. **Set Alias in LINE Developers Console**
+      ```
+      Messaging API > Rich menus > Rich menu aliases
+      Rich Menu ID: richmenu-xxxxx
+      Alias: next-menu-alias
+      ```
+
+   c. **When user taps, it automatically switches to the specified alias rich menu**
 
 5. **Export JSON**
    - Click "JSON Preview" button
@@ -47,85 +65,47 @@ This guide explains how to distribute different rich menus to segmented users us
 
 ---
 
-## Step 2: Register Rich Menu on LINE Developers
+## Step 2: Get Channel Access Token
 
-### 2.1 Using LINE Official Account Manager
-
-1. **Login to LINE Official Account Manager**
-   - https://manager.line.biz/
-
-2. **Create Rich Menu**
-   - Home > Rich menus > Create
-   - Input image and action settings from Step 1
-
-3. **Get Rich Menu ID**
-   - Copy ID from rich menu list
-   - Format: `richmenu-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
-
-### 2.2 Using LINE Messaging API (Recommended)
+### 2.1 Access LINE Developers Console
 
 1. **Login to LINE Developers Console**
    - https://developers.line.biz/console/
 
 2. **Get Channel Access Token**
-   ```
-   Settings > Messaging API > Channel access token
-   ```
+   - Select your channel
+   - Open `Messaging API` tab
+   - In `Channel access token` section, click "Issue"
+   - Copy the issued token
 
-3. **Create Rich Menu via API**
-
-   Use "LINE API Integration" feature in this app:
-
-   a. **Enter Channel Access Token**
-
-   b. **Click "Create Rich Menu"**
-
-   c. **Copy Rich Menu ID**
-      - Format: `richmenu-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
-      - Use this ID in Treasure Data
-
-4. **Upload Image**
-   - Use "Upload Rich Menu Image" feature
-   - Or upload manually via API panel
+   ⚠️ **Note**: The token is displayed only once, so make sure to copy and save it securely
 
 ---
 
-## Step 3: Create Segments in Treasure Data
+## Step 3: Create and Register Rich Menu
 
-### 3.1 Define Segments in Audience Studio
+### 3.1 Use "LINE API Integration" Feature in This App
 
-1. **Access Audience Studio**
-   ```
-   Treasure Data Console > Audiences > Segments
-   ```
+1. **Open "LINE API Integration" in Rich Menu Editor**
+   - Click "LINE API Integration" button in the top right
 
-2. **Create New Segment**
+2. **Enter Channel Access Token**
+   - Paste the token obtained in Step 2 into the input field
 
-   **Example 1: VIP Users**
-   ```sql
-   SELECT
-     user_id,
-     line_user_id
-   FROM
-     user_master
-   WHERE
-     total_purchase_amount >= 100000
-     AND last_purchase_date >= TD_TIME_ADD(TD_SCHEDULED_TIME(), '-30d')
-   ```
+3. **Create Rich Menu**
+   - Click "Create Rich Menu" button
+   - The app will automatically:
+     - Create rich menu in LINE API
+     - Auto-upload background image
+     - Obtain Rich Menu ID
 
-   **Example 2: New Users**
-   ```sql
-   SELECT
-     user_id,
-     line_user_id
-   FROM
-     user_master
-   WHERE
-     registration_date >= TD_TIME_ADD(TD_SCHEDULED_TIME(), '-7d')
-   ```
+4. **Copy Rich Menu ID**
+   - After successful creation, Rich Menu ID will be displayed
+   - Format: `richmenu-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+   - Click "Copy" button to copy to clipboard
+   - **Use this ID in Treasure Data**
 
-3. **Set Segment Name**
-   - e.g., `line_vip_users`, `line_new_users`
+   ⚠️ **Note**: Rich menus created via API are not displayed in LINE Developers Console management screen. Use the "Get Existing Menus" feature in this app to verify them.
 
 ---
 
@@ -143,17 +123,14 @@ This guide explains how to distribute different rich menus to segmented users us
 
 3. **Basic Settings**
    ```
-   Name: LINE Rich Menu - VIP Users
-   Description: Rich menu distribution for VIP users
+   Name: LINE Rich Menu Delivery
+   Description: Rich menu distribution connector
    ```
 
 ### 4.2 Configure Authentication
 
-1. **Enter Channel Access Token**
-   ```
-   LINE Developers Console > Settings > Messaging API
-   → Copy and paste Channel access token
-   ```
+**Enter Channel Access Token**
+- Paste the token obtained in Step 2
 
 ### 4.3 Rich Menu Distribution Settings
 
@@ -166,15 +143,32 @@ This guide explains how to distribute different rich menus to segmented users us
    ```
    Rich Menu ID: richmenu-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    ```
-   ⚠️ **Important**: Enter the exact Rich Menu ID from Step 2
+   ⚠️ **Important**: Enter the exact Rich Menu ID from Step 3
 
 3. **Mapping Configuration**
    ```
    User ID Column: line_user_id
-   (Column name containing LINE user IDs in your Treasure Data table)
    ```
 
-### 4.4 Schedule Configuration
+---
+
+## Step 5: Create Segments in Treasure Data
+
+### 5.1 Define Segments in Audience Studio
+
+1. **Access Audience Studio**
+   ```
+   Treasure Data Console > Audiences > Segments
+   ```
+
+2. **Create New Segment**
+   - Create a segment query that includes `user_id` and `line_user_id` from your table
+   - Specify delivery conditions (purchase amount, registration date, etc.)
+
+3. **Set Segment Name**
+   - e.g., `line_vip_users`, `line_new_users`
+
+### 5.2 Configure Distribution Schedule
 
 1. **Set Schedule**
    ```
@@ -183,14 +177,14 @@ This guide explains how to distribute different rich menus to segmented users us
    Start Time: 09:00
    ```
 
-2. **Select Segment**
-   - Choose the segment created in Step 3
+2. **Select Connector**
+   - Choose the connector created in Step 4
 
 ---
 
-## Step 5: Activate in Audience Studio
+## Step 6: Activate in Audience Studio
 
-### 5.1 Audience Activation
+### 6.1 Audience Activation
 
 1. **Access Audience > Activations**
 
@@ -204,7 +198,7 @@ This guide explains how to distribute different rich menus to segmented users us
 3. **Start Distribution**
    - Click "Activate" button
 
-### 5.2 Monitor Distribution
+### 6.2 Monitor Distribution
 
 1. **Check Activation History**
    ```
@@ -215,47 +209,35 @@ This guide explains how to distribute different rich menus to segmented users us
 
 ---
 
-## Step 6: Segment-based Rich Menu Switching
+## Step 7: Distributing to Multiple Segments
 
-### 6.1 Managing Multiple Rich Menus
+### 7.1 Basic Rule
 
-For distributing different rich menus to different segments:
+**Important:** Each Activation can only configure one rich menu.
 
-**Pattern 1: By User Attributes**
 ```
-VIP Users      → richmenu-vip-xxxxx (with special offers)
-Regular Users  → richmenu-standard-xxxxx (basic menu)
-New Users      → richmenu-welcome-xxxxx (with tutorial)
+1 Segment = 1 Rich Menu = 1 Activation
 ```
 
-**Pattern 2: By Behavior History**
-```
-Purchased      → richmenu-purchased-xxxxx (repeat purchase promotion)
-Cart Abandoned → richmenu-cart-abandoned-xxxxx (purchase promotion)
-Browsed Only   → richmenu-browsed-xxxxx (interest building)
-```
+### 7.2 Distributing to Multiple Segments
 
-### 6.2 Rich Menu Switch Action
+To distribute different rich menus to different segments, **repeat Steps 1-6 for each segment**.
 
-For dynamic menu switching based on user actions:
+**Example: Distributing to 3 Segments**
 
-1. **Configure Action in Rich Menu Editor**
-   ```
-   Action Type: Rich Menu Switch
-   Target Rich Menu Alias ID: next-menu-alias
-   Data: user-action-data
-   ```
+| Segment | Rich Menu ID | Activation Name |
+|---------|--------------|-----------------|
+| VIP Users | richmenu-vip-xxxxx | LINE Rich Menu - VIP Users |
+| Regular Users | richmenu-standard-xxxxx | LINE Rich Menu - Standard Users |
+| New Users | richmenu-welcome-xxxxx | LINE Rich Menu - New Users |
 
-2. **Set Alias in LINE Developers Console**
-   ```
-   Rich Menu ID: richmenu-xxxxx
-   Alias: next-menu-alias
-   ```
-
-3. **Configure Switch Trigger in Treasure Data**
-   - Receive postback data via Webhook
-   - Dynamically update segments
-   - Distribute new rich menu
+**Process:**
+1. Create rich menu for VIP users (Steps 1-3)
+2. Create connector for VIP users (Step 4)
+3. Create VIP user segment (Step 5)
+4. Execute activation for VIP users (Step 6)
+5. Repeat 1-4 for Regular users
+6. Repeat 1-4 for New users
 
 ---
 
@@ -307,59 +289,6 @@ For dynamic menu switching based on user actions:
      ┌─────────┐
      │ User B  │ Standard Menu
      └─────────┘
-```
-
----
-
-## Best Practices
-
-### 1. Rich Menu Design
-
-✅ **DO**
-- Provide clear value proposition for each user segment
-- Make tap areas finger-friendly (minimum 100x100px)
-- Place important actions in prominent positions
-- Test image and action settings in advance
-
-❌ **DON'T**
-- Don't create more than 20 tap areas
-- Avoid tap areas that are too small
-- Don't use completely different designs between segments (maintain brand consistency)
-
-### 2. Segment Management
-
-✅ **DO**
-- Document segment definitions clearly
-- Monitor segment sizes regularly
-- Avoid overlaps (users shouldn't belong to multiple segments)
-- Set appropriate segment update frequency
-
-❌ **DON'T**
-- Don't create segments that are too small (<100 users)
-- Avoid overly complex segment conditions
-- Don't use real-time updates when not necessary
-
-### 3. Distribution Schedule
-
-✅ **DO**
-- Distribute during users' active hours
-- A/B test to find optimal distribution timing
-- Measure effectiveness after distribution
-
-❌ **DON'T**
-- Avoid late night or early morning distribution
-- Don't distribute to same users multiple times in short period
-- Don't forget to configure retry settings for distribution errors
-
-### 4. Monitoring
-
-Regularly check these metrics:
-
-```
-- Delivery Success Rate: (Success / Attempts) × 100
-- Tap Rate: Taps / Views
-- Conversion Rate: Purchases / Taps
-- Error Rate: Errors / Attempts
 ```
 
 ---

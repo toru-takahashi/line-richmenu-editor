@@ -39,6 +39,9 @@ export default function JSONPanel({ menu, setMenu }: Props) {
       if (!['date', 'time', 'datetime'].includes(a.mode)) errs.push(t('datetimeModeInvalid'))
     } else if (actionType === 'richmenuswitch') {
       if (!a.richMenuAliasId || typeof a.richMenuAliasId !== 'string') errs.push(t('richMenuAliasIdRequired'))
+      if (!a.data || typeof a.data !== 'string') errs.push(t('richMenuSwitchDataRequired'))
+    } else if (actionType === 'clipboard') {
+      if (!a.clipboardText || typeof a.clipboardText !== 'string') errs.push(t('clipboardTextRequired'))
     } else {
       errs.push(t('unsupportedActionType', { type: actionType }))
     }

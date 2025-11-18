@@ -89,6 +89,19 @@ export default {
       } else if (path.match(/^\/api\/user\/[^\/]+\/richmenu$/) && request.method === 'GET') {
         const userId = path.split('/')[3];
         return await getUserRichMenu(channelAccessToken, userId, corsHeaders);
+      } else if (path === '/api/richmenu/alias/list' && request.method === 'GET') {
+        return await listRichMenuAliases(channelAccessToken, corsHeaders);
+      } else if (path === '/api/richmenu/alias' && request.method === 'POST') {
+        return await createRichMenuAlias(request, channelAccessToken, corsHeaders);
+      } else if (path.match(/^\/api\/richmenu\/alias\/[^\/]+$/) && request.method === 'GET') {
+        const aliasId = path.split('/')[4];
+        return await getRichMenuAlias(channelAccessToken, aliasId, corsHeaders);
+      } else if (path.match(/^\/api\/richmenu\/alias\/[^\/]+$/) && request.method === 'POST') {
+        const aliasId = path.split('/')[4];
+        return await updateRichMenuAlias(request, channelAccessToken, aliasId, corsHeaders);
+      } else if (path.match(/^\/api\/richmenu\/alias\/[^\/]+$/) && request.method === 'DELETE') {
+        const aliasId = path.split('/')[4];
+        return await deleteRichMenuAlias(channelAccessToken, aliasId, corsHeaders);
       } else {
         return jsonResponse({ error: 'Not found' }, 404, corsHeaders);
       }
@@ -335,6 +348,101 @@ async function getUserRichMenu(token: string, userId: string, corsHeaders: Recor
   } else {
     const error = await response.text();
     return jsonResponse({ error: 'Failed to get user rich menu', details: error }, response.status, corsHeaders);
+  }
+}
+
+/**
+ * Get list of all rich menu aliases
+ */
+async function listRichMenuAliases(token: string, corsHeaders: Record<string, string>): Promise<Response> {
+  const response = await fetch(`${LINE_API_BASE}/richmenu/alias/list`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+  return jsonResponse(data, response.status, corsHeaders);
+}
+
+/**
+ * Create a new rich menu alias
+ */
+async function createRichMenuAlias(request: Request, token: string, corsHeaders: Record<string, string>): Promise<Response> {
+  const body = await request.json();
+
+  const response = await fetch(`${LINE_API_BASE}/richmenu/alias`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (response.ok) {
+    return jsonResponse({ message: 'Rich menu alias created successfully' }, 200, corsHeaders);
+  } else {
+    const data = await response.json();
+    return jsonResponse(data, response.status, corsHeaders);
+  }
+}
+
+/**
+ * Get a specific rich menu alias
+ */
+async function getRichMenuAlias(token: string, aliasId: string, corsHeaders: Record<string, string>): Promise<Response> {
+  const response = await fetch(`${LINE_API_BASE}/richmenu/alias/${aliasId}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+  return jsonResponse(data, response.status, corsHeaders);
+}
+
+/**
+ * Update an existing rich menu alias
+ */
+async function updateRichMenuAlias(request: Request, token: string, aliasId: string, corsHeaders: Record<string, string>): Promise<Response> {
+  const body = await request.json();
+
+  const response = await fetch(`${LINE_API_BASE}/richmenu/alias/${aliasId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (response.ok) {
+    return jsonResponse({ message: 'Rich menu alias updated successfully' }, 200, corsHeaders);
+  } else {
+    const data = await response.json();
+    return jsonResponse(data, response.status, corsHeaders);
+  }
+}
+
+/**
+ * Delete a rich menu alias
+ */
+async function deleteRichMenuAlias(token: string, aliasId: string, corsHeaders: Record<string, string>): Promise<Response> {
+  const response = await fetch(`${LINE_API_BASE}/richmenu/alias/${aliasId}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.ok) {
+    return jsonResponse({ message: 'Rich menu alias deleted successfully' }, 200, corsHeaders);
+  } else {
+    const error = await response.text();
+    return jsonResponse({ error: 'Failed to delete rich menu alias', details: error }, response.status, corsHeaders);
   }
 }
 

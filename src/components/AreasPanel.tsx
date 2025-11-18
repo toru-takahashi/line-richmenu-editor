@@ -156,8 +156,8 @@ export default function AreasPanel({ areas, setAreas, selectedId, setSelectedId 
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3>{t('tapAreas')} ({areas.length})</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-neutral-11">{t('tapAreas')} ({areas.length})</h3>
         <button className="btn secondary" onClick={() => { if (areas.length >= 20) return; const newA: Area = { id: crypto.randomUUID(), bounds: { x: 0, y: 0, width: 100, height: 100 }, action: { type: 'message', text: 'Hello' } }; setAreas([...areas, newA]); setSelectedId(newA.id) }}>{t('addArea')}</button>
       </div>
 
@@ -166,14 +166,14 @@ export default function AreasPanel({ areas, setAreas, selectedId, setSelectedId 
           const isSelected = selectedId === a.id
           return (
             <div key={a.id} className="item" style={{paddingBottom: isSelected ? 10 : 6}}>
-              <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                <div style={{cursor:'pointer'}} onClick={() => setSelectedId(a.id)}>
-                  <div><strong>#{idx + 1}</strong> <span className="small">{actionSummary(a)}</span></div>
+              <div className="flex items-center justify-between">
+                <div className="cursor-pointer flex-1" onClick={() => setSelectedId(a.id)}>
+                  <div className="text-sm"><strong className="font-semibold text-neutral-11">#{idx + 1}</strong> <span className="small">{actionSummary(a)}</span></div>
                   <div className="small">x:{a.bounds.x} y:{a.bounds.y} w:{a.bounds.width} h:{a.bounds.height}</div>
                 </div>
-                <div>
-                  <button className="btn" onClick={() => setSelectedId(isSelected ? null : a.id)}>{isSelected ? t('close') : t('edit')}</button>
-                  <button className="btn secondary" style={{marginLeft:6}} onClick={() => {
+                <div className="flex gap-1.5 ml-2">
+                  <button className="btn text-xs px-3 py-1.5" onClick={() => setSelectedId(isSelected ? null : a.id)}>{isSelected ? t('close') : t('edit')}</button>
+                  <button className="btn secondary text-xs px-3 py-1.5" onClick={() => {
                     if (isSelected) setSelectedId(null);
                     setAreas(prev => prev.filter(x => x.id !== a.id));
                   }}>{t('delete')}</button>
@@ -181,8 +181,8 @@ export default function AreasPanel({ areas, setAreas, selectedId, setSelectedId 
               </div>
 
               {isSelected && (
-                <div style={{marginTop:8, padding:8, background:'#fff8', borderRadius:6}}>
-                  <h4 style={{margin:'6px 0'}}>{t('editArea')}</h4>
+                <div className="mt-2 rounded-td border border-neutral-3 bg-neutral-0/80 p-2">
+                  <h4 className="my-1.5 text-sm font-semibold text-neutral-11">{t('editArea')}</h4>
                   <div className="field">
                     <label>{t('startX')}</label>
                     <input type="number" value={a.bounds.x} onChange={(e) => updateSelected({ bounds: { ...a.bounds, x: Number(e.target.value) } })} />
@@ -200,8 +200,8 @@ export default function AreasPanel({ areas, setAreas, selectedId, setSelectedId 
                     <input type="number" value={a.bounds.height} onChange={(e) => updateSelected({ bounds: { ...a.bounds, height: Number(e.target.value) } })} />
                   </div>
 
-                  <div style={{marginTop:8}}>
-                    <h4>{t('action')}</h4>
+                  <div className="mt-2">
+                    <h4 className="mb-2 text-sm font-semibold text-neutral-11">{t('action')}</h4>
                     <ActionForm action={a.action} onChange={(act) => updateSelected({ action: act as LineAction })} />
                   </div>
                 </div>

@@ -38,11 +38,11 @@ export default function TemplatesPanel({ size, setAreas, setSelectedId, areas }:
   ]
 
   return (
-    <div style={{marginBottom:12}}>
-      <h4>{t('templates')}</h4>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+    <div className="mb-3">
+      <h4 className="mb-2 text-base font-semibold text-neutral-11">{t('templates')}</h4>
+      <div className="grid grid-cols-2 gap-2">
         {presets.map(p => (
-          <button key={p.id} className="btn ghost" onClick={() => {
+          <button key={p.id} className="btn ghost text-xs px-2 py-1.5" onClick={() => {
             const newAreas = buildAreasFromRects(p.rects, size)
             // if existing areas exist, confirm replacement
             if (areas && areas.length > 0) {
@@ -55,7 +55,7 @@ export default function TemplatesPanel({ size, setAreas, setSelectedId, areas }:
           }}>{p.name}</button>
         ))}
       </div>
-      <div className="small" style={{marginTop:8}}>{t('templateNote')}</div>
+      <div className="small mt-2">{t('templateNote')}</div>
     </div>
   )
 }

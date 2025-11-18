@@ -9,46 +9,27 @@ export default function PrivacyModal({ onClose }: Props) {
   const { t } = useI18n()
   return (
     <div
-      style={{
-        position: 'fixed',
-        left: 0,
-        top: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0,0,0,0.4)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 130,
-      }}
+      className="fixed inset-0 z-[130] flex items-center justify-center bg-black/40 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        style={{
-          width: '700px',
-          maxWidth: '95%',
-          maxHeight: '90%',
-          background: '#fff',
-          borderRadius: 8,
-          padding: 24,
-          overflow: 'auto',
-        }}
+        className="w-[700px] max-w-[95%] max-h-[90%] overflow-auto rounded-td-xl bg-white p-6 shadow-td-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h2 style={{ margin: 0 }}>{t('privacyTitle')}</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-neutral-11">{t('privacyTitle')}</h2>
           <button className="btn secondary" onClick={onClose}>
             {t('close')}
           </button>
         </div>
 
-        <div style={{ lineHeight: 1.7 }}>
-          <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 18, marginBottom: 8 }}>{t('dataHandlingTitle')}</h3>
-            <p style={{ margin: '8px 0', fontSize: 14 }}>
+        <div className="leading-relaxed">
+          <section className="mb-6">
+            <h3 className="mb-2 text-lg font-semibold text-neutral-11">{t('dataHandlingTitle')}</h3>
+            <p className="my-2 text-sm text-neutral-9">
               {t('dataHandlingIntro')}
             </p>
-            <ul style={{ paddingLeft: 20, margin: '8px 0', fontSize: 14 }}>
+            <ul className="my-2 pl-5 text-sm text-neutral-9">
               <li dangerouslySetInnerHTML={{ __html: t('dataHandlingPoint1') }} />
               <li dangerouslySetInnerHTML={{ __html: t('dataHandlingPoint2') }} />
               <li>{t('dataHandlingPoint3')}</li>
@@ -58,9 +39,9 @@ export default function PrivacyModal({ onClose }: Props) {
             </ul>
           </section>
 
-          <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 18, marginBottom: 8 }}>{t('tokenTitle')}</h3>
-            <ul style={{ paddingLeft: 20, margin: '8px 0', fontSize: 14 }}>
+          <section className="mb-6">
+            <h3 className="mb-2 text-lg font-semibold text-neutral-11">{t('tokenTitle')}</h3>
+            <ul className="my-2 pl-5 text-sm text-neutral-9">
               <li dangerouslySetInnerHTML={{ __html: t('tokenPoint1') }} />
               <li>{t('tokenPoint2')}</li>
               <li>{t('tokenPoint3')}</li>
@@ -70,12 +51,12 @@ export default function PrivacyModal({ onClose }: Props) {
             </ul>
           </section>
 
-          <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 18, marginBottom: 8 }}>{t('disclaimerTitle')}</h3>
-            <p style={{ margin: '8px 0', fontSize: 14 }}>
+          <section className="mb-6">
+            <h3 className="mb-2 text-lg font-semibold text-neutral-11">{t('disclaimerTitle')}</h3>
+            <p className="my-2 text-sm text-neutral-9">
               {t('disclaimerIntro')}
             </p>
-            <ul style={{ paddingLeft: 20, margin: '8px 0', fontSize: 14 }}>
+            <ul className="my-2 pl-5 text-sm text-neutral-9">
               <li dangerouslySetInnerHTML={{ __html: t('disclaimerPoint1') }} />
               <li>{t('disclaimerPoint2')}</li>
               <li>{t('disclaimerPoint3')}</li>
@@ -86,9 +67,9 @@ export default function PrivacyModal({ onClose }: Props) {
             </ul>
           </section>
 
-          <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 18, marginBottom: 8 }}>{t('userResponsibilityTitle')}</h3>
-            <ul style={{ paddingLeft: 20, margin: '8px 0', fontSize: 14 }}>
+          <section className="mb-6">
+            <h3 className="mb-2 text-lg font-semibold text-neutral-11">{t('userResponsibilityTitle')}</h3>
+            <ul className="my-2 pl-5 text-sm text-neutral-9">
               <li>{t('userResponsibilityPoint1')}</li>
               <li>{t('userResponsibilityPoint2')}</li>
               <li>{t('userResponsibilityPoint3')}</li>
@@ -98,9 +79,9 @@ export default function PrivacyModal({ onClose }: Props) {
             </ul>
           </section>
 
-          <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 18, marginBottom: 8 }}>{t('recommendationsTitle')}</h3>
-            <ul style={{ paddingLeft: 20, margin: '8px 0', fontSize: 14 }}>
+          <section className="mb-6">
+            <h3 className="mb-2 text-lg font-semibold text-neutral-11">{t('recommendationsTitle')}</h3>
+            <ul className="my-2 pl-5 text-sm text-neutral-9">
               <li>{t('recommendationsPoint1')}</li>
               <li>{t('recommendationsPoint2')}</li>
               <li>{t('recommendationsPoint3')}</li>
@@ -110,15 +91,15 @@ export default function PrivacyModal({ onClose }: Props) {
           </section>
 
           <section>
-            <h3 style={{ fontSize: 18, marginBottom: 8 }}>{t('serviceProvisionTitle')}</h3>
-            <p style={{ margin: '8px 0', fontSize: 14 }}>
+            <h3 className="mb-2 text-lg font-semibold text-neutral-11">{t('serviceProvisionTitle')}</h3>
+            <p className="my-2 text-sm text-neutral-9">
               {t('serviceProvisionText')}
             </p>
           </section>
         </div>
 
-        <div style={{ marginTop: 24, textAlign: 'center' }}>
-          <button className="btn" onClick={onClose} style={{ padding: '8px 24px' }}>
+        <div className="mt-6 text-center">
+          <button className="btn px-6 py-2" onClick={onClose}>
             {t('understood')}
           </button>
         </div>

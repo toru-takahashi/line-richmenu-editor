@@ -111,9 +111,14 @@ export default function ImageSettings({ menu, setMenu, imageNaturalSize, setImag
           onChange={(e) => setMenu({ ...menu, imageUrl: e.target.value })}
           placeholder={t('backgroundImageUrlPlaceholder')}
         />
-        <div style={{marginTop:8}}>
-          <label style={{display:'block',fontSize:13,marginBottom:6}}>{t('orUploadImage')}</label>
-          <input type="file" accept="image/png,image/jpeg" onChange={handleFile} />
+        <div className="mt-2">
+          <label className="mb-1.5 block text-sm">{t('orUploadImage')}</label>
+          <input
+            type="file"
+            accept="image/png,image/jpeg"
+            onChange={handleFile}
+            className="w-full text-sm text-neutral-9 file:mr-4 file:rounded-td file:border-0 file:bg-td-blue-600 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-white hover:file:bg-td-blue-700 file:cursor-pointer"
+          />
         </div>
         {imgError && <div className="hint">{imgError}</div>}
         {imageNaturalSize && (
@@ -122,13 +127,18 @@ export default function ImageSettings({ menu, setMenu, imageNaturalSize, setImag
         {imageNaturalSize && (imageNaturalSize.width !== menu.size.width || imageNaturalSize.height !== menu.size.height) && (
           <div className="hint">{t('recommendedSize', { width: menu.size.width.toString(), height: menu.size.height.toString() })}</div>
         )}
-        <div style={{marginTop:10}}>
-          <a href="https://www.canva.com/ja_jp/line-rich-menu/templates/" target="_blank" rel="noreferrer">{t('canvaTemplate')}</a>
+        <div className="mt-2.5">
+          <a
+            href="https://www.canva.com/ja_jp/line-rich-menu/templates/"
+            target="_blank"
+            rel="noreferrer"
+            className="text-sm text-td-blue-600 underline hover:text-td-blue-700"
+          >{t('canvaTemplate')}</a>
         </div>
       </div>
-        {/* 厳密な制約チェック */}
+        {/* Strict constraint check */}
         {imageNaturalSize && (
-          <div style={{marginTop:6}}>
+          <div className="mt-1.5 space-y-1">
             {imageNaturalSize.width < 800 && <div className="hint">{t('imageWidthMin')}</div>}
             {imageNaturalSize.width > 2500 && <div className="hint">{t('imageWidthMax')}</div>}
             {imageNaturalSize.height < 250 && <div className="hint">{t('imageHeightMin')}</div>}

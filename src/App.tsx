@@ -183,40 +183,32 @@ export default function App() {
   return (
     <>
       <div className="topbar">
-        <div style={{display:'flex',alignItems:'center',gap:8}}>
+        <div className="flex items-center gap-2">
           <div className="brandTitle">{t('appTitle')}</div>
         </div>
-        <div style={{marginLeft:'auto', display:'flex', alignItems:'center', gap:8}}>
-          <div style={{ fontSize:13, opacity:0.95 }}>{t('appSubtitle')}</div>
-          {/* 言語セレクター */}
+        <div className="ml-auto flex items-center gap-2">
+          <div className="text-sm opacity-95">{t('appSubtitle')}</div>
+          {/* Language selector */}
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value as 'ja' | 'en')}
-            style={{
-              padding: '6px 10px',
-              borderRadius: 6,
-              border: '1px solid #ddd',
-              background: '#fff',
-              cursor: 'pointer',
-              fontSize: 13
-            }}
+            className="cursor-pointer rounded-td border border-white/30 bg-white/10 px-2.5 py-1.5 text-sm text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50"
           >
             <option value="ja">日本語</option>
             <option value="en">English</option>
           </select>
-          <button className="btn secondary" onClick={() => setShowJson(s => !s)} style={{padding:'6px 10px'}}>{t('jsonPreview')}</button>
-          <button className="btn" onClick={() => setShowLineApi(s => !s)} style={{padding:'6px 10px'}}>{t('lineApiIntegration')}</button>
+          <button className="btn secondary px-2.5 py-1.5" onClick={() => setShowJson(s => !s)}>{t('jsonPreview')}</button>
+          <button className="btn px-2.5 py-1.5 bg-white/20 hover:bg-white/30 border border-white/30" onClick={() => setShowLineApi(s => !s)}>{t('lineApiIntegration')}</button>
         </div>
       </div>
 
       <div className="layout">
           <div className="left">
           <ImageSettings menu={menu} setMenu={(m) => setMenu(m)} imageNaturalSize={imageNaturalSize} setImageNaturalSize={setImageNaturalSize} />
-          {/* テンプレートを左メニューに移動しました */}
-          <div style={{marginTop:12}}>
+          {/* Templates moved to left panel */}
+          <div className="mt-3">
             <TemplatesPanel size={menu.size} areas={areas} setAreas={setAreasCompat} setSelectedId={setSelectedId} />
           </div>
-          {/* 作成モードはキャンバスで作成のみ（手動モードは省略） */}
         </div>
         <div className="center">
           <CanvasEditor
@@ -238,10 +230,10 @@ export default function App() {
 
         {/* JSON modal */}
         {showJson && (
-          <div style={{position:'fixed',left:0,top:0,right:0,bottom:0,background:'rgba(0,0,0,0.4)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:120}} onClick={() => setShowJson(false)}>
-            <div style={{width:'900px', maxWidth:'95%', maxHeight:'90%', background:'#fff', borderRadius:8, padding:16, overflow:'auto'}} onClick={(e) => e.stopPropagation()}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
-                <div style={{fontWeight:700}}>{t('jsonPreview')}</div>
+          <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowJson(false)}>
+            <div className="w-[900px] max-w-[95%] max-h-[90%] overflow-auto rounded-td-xl bg-white p-4 shadow-td-xl" onClick={(e) => e.stopPropagation()}>
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-neutral-11">{t('jsonPreview')}</h2>
                 <button className="btn secondary" onClick={() => setShowJson(false)}>{t('close')}</button>
               </div>
               <JSONPanel
@@ -254,10 +246,10 @@ export default function App() {
 
         {/* LINE API modal */}
         {showLineApi && (
-          <div style={{position:'fixed',left:0,top:0,right:0,bottom:0,background:'rgba(0,0,0,0.4)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:120}} onClick={() => setShowLineApi(false)}>
-            <div style={{width:'900px', maxWidth:'95%', maxHeight:'90%', background:'#fff', borderRadius:8, padding:16, overflow:'auto'}} onClick={(e) => e.stopPropagation()}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
-                <div style={{fontWeight:700}}>{t('lineApiTitle')}</div>
+          <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowLineApi(false)}>
+            <div className="w-[900px] max-w-[95%] max-h-[90%] overflow-auto rounded-td-xl bg-white p-4 shadow-td-xl" onClick={(e) => e.stopPropagation()}>
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-neutral-11">{t('lineApiTitle')}</h2>
                 <button className="btn secondary" onClick={() => setShowLineApi(false)}>{t('close')}</button>
               </div>
               <LineApiPanel
@@ -273,34 +265,11 @@ export default function App() {
         {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
 
         {/* Footer */}
-        <div style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          background: 'rgba(255, 255, 255, 0.95)',
-          borderTop: '1px solid #ddd',
-          padding: '8px 16px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 16,
-          fontSize: 12,
-          color: '#666',
-          zIndex: 100,
-        }}>
+        <div className="fixed bottom-0 left-0 right-0 z-[100] flex items-center justify-center gap-4 border-t border-neutral-3 bg-white/95 px-4 py-2 text-xs text-neutral-8 backdrop-blur-sm">
           <span>{t('dataPrivacyFooter')}</span>
           <button
             onClick={() => setShowPrivacy(true)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#0066cc',
-              textDecoration: 'underline',
-              cursor: 'pointer',
-              padding: 0,
-              fontSize: 12,
-            }}
+            className="cursor-pointer border-0 bg-transparent p-0 text-xs text-td-blue-600 underline hover:text-td-blue-700"
           >
             {t('privacyAndDisclaimer')}
           </button>

@@ -128,22 +128,29 @@ export default function JSONPanel({ menu, setMenu }: Props) {
 
   return (
     <div>
-      <h3>{t('jsonTitle')}</h3>
+      <h3 className="mb-3 text-lg font-semibold text-neutral-11">{t('jsonTitle')}</h3>
       <div className="field">
         <label>{t('jsonPreviewLabel')}</label>
-        <textarea style={{height:200}} readOnly value={JSON.stringify(richMenuForAPI, null, 2)} />
+        <textarea
+          className="h-[200px] font-mono text-xs"
+          readOnly
+          value={JSON.stringify(richMenuForAPI, null, 2)}
+        />
       </div>
-      <div style={{display:'flex',gap:8}}>
+      <div className="flex gap-2">
         <button className="btn" onClick={copyJson}>{t('copyJson')}</button>
         <button className="btn" onClick={downloadJson}>{t('downloadJson')}</button>
         <button className="btn secondary" onClick={() => setShowImport(s => !s)}>{showImport ? t('close') : t('import')}</button>
       </div>
 
       {showImport && (
-        <div style={{marginTop:8}}>
-          <label>{t('importJson')}</label>
-          <textarea ref={importRef} style={{width:'100%',height:120}} />
-          <div style={{marginTop:6}}>
+        <div className="mt-3 rounded-td border border-neutral-3 bg-neutral-1 p-3">
+          <label className="mb-1.5 block text-sm font-medium text-neutral-10">{t('importJson')}</label>
+          <textarea
+            ref={importRef}
+            className="h-[120px] w-full font-mono text-xs"
+          />
+          <div className="mt-2">
             <button className="btn" onClick={importFromText}>{t('load')}</button>
           </div>
         </div>
